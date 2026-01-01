@@ -38,11 +38,14 @@ export interface Order {
   customer: CustomerDetails;
   items: CartItem[];
   total: number;
+  discount?: number;
+  couponCode?: string | null;
   gst: number;
   finalTotal: number;
   status: OrderStatus;
   paymentMethod: string;
   paymentStatus: 'pending' | 'completed' | 'failed';
+  transactionId?: string;
   createdAt: string;
   updatedAt: string;
   trackingNumber?: string;
