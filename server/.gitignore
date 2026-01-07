@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Database
+*.db
+*.sqlite
+database/*.db
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Uploads (keep folder but ignore files)
+uploads/*
+!uploads/.gitkeep
