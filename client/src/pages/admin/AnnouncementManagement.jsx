@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, X, Loader2, Bell, BellOff, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, X, Loader2, Bell, MessageSquare, Megaphone, CheckCircle, AlertTriangle } from 'lucide-react';
 import { announcementsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -7,17 +7,15 @@ export default function AnnouncementManagement() {
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+    const [editingItem, setEditingItem] = useState(null);
     const [saving, setSaving] = useState(false);
-    const [previewType, setPreviewType] = useState(null);
+    const [showPreview, setShowPreview] = useState(null);
 
     const [formData, setFormData] = useState({
         title: '',
         message: '',
-        type: 'both',
-        isActive: true,
-        startDate: '',
-        endDate: '',
+        type: 'toast',
+        is_active: true,
     });
 
     useEffect(() => {
@@ -26,7 +24,7 @@ export default function AnnouncementManagement() {
 
     const loadAnnouncements = async () => {
         try {
-            const response = await announcementsAPI.getAll();
+            const response = await announcementsAPI.getAllAdmin();
             setAnnouncements(response.data.announcements);
         } catch (error) {
             toast.error('Failed to load announcements');
@@ -35,42 +33,34 @@ export default function AnnouncementManagement() {
         }
     };
 
-    const handleOpenModal = (announcement = null) => {
-        if (announcement) {
-            setEditingAnnouncement(announcement);
+    const resetForm = () => {
+        setFormData({
+            title: '',
+            message: '',
+            type: 'toast',
+            is_active: true,
+        });
+        setEditingItem(null);
+    };
+
+    const handleOpenModal = (item = null) => {
+        if (item) {
+            setEditingItem(item);
             setFormData({
-                title: announcement.title,
-                message: announcement.message,
-                type: announcement.type,
-                isActive: announcement.is_active === 1,
-                startDate: announcement.start_date ? announcement.start_date.split('T')[0] : '',
-                endDate: announcement.end_date ? announcement.end_date.split('T')[0] : '',
+                title: item.title,
+                message: item.message,
+                type: item.type,
+                is_active: item.is_active === 1,
             });
         } else {
-            setEditingAnnouncement(null);
-            setFormData({
-                title: '',
-                message: '',
-                type: 'both',
-                isActive: true,
-                startDate: '',
-                endDate: '',
-            });
+            resetForm();
         }
         setShowModal(true);
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setEditingAnnouncement(null);
-    };
-
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? checked : value
-        });
+        resetForm();
     };
 
     const handleSubmit = async (e) => {
@@ -84,8 +74,8 @@ export default function AnnouncementManagement() {
         setSaving(true);
 
         try {
-            if (editingAnnouncement) {
-                await announcementsAPI.update(editingAnnouncement.id, formData);
+            if (editingItem) {
+                await announcementsAPI.update(editingItem.id, formData);
                 toast.success('Announcement updated');
             } else {
                 await announcementsAPI.create(formData);
@@ -94,248 +84,238 @@ export default function AnnouncementManagement() {
             handleCloseModal();
             loadAnnouncements();
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Failed to save announcement');
+            toast.error('Failed to save');
         } finally {
             setSaving(false);
         }
     };
 
-    const handleToggle = async (id) => {
+    const handleToggle = async (id, currentStatus) => {
         try {
             await announcementsAPI.toggle(id);
-            toast.success('Announcement status updated');
+            toast.success(currentStatus ? 'Deactivated' : 'Activated');
             loadAnnouncements();
         } catch (error) {
-            toast.error('Failed to update status');
+            toast.error('Failed to toggle');
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this announcement?')) return;
+        if (!window.confirm('Delete this announcement?')) return;
 
         try {
             await announcementsAPI.delete(id);
-            toast.success('Announcement deleted');
+            toast.success('Deleted');
             loadAnnouncements();
         } catch (error) {
-            toast.error('Failed to delete announcement');
+            toast.error('Failed to delete');
         }
     };
 
-    const getTypeLabel = (type) => {
-        switch (type) {
-            case 'popup': return 'Popup Only';
-            case 'toast': return 'Toast Only';
-            case 'both': return 'Popup & Toast';
-            default: return type;
-        }
+    const getTypeStyles = (type) => {
+        if (type === 'popup') return {
+            icon: Megaphone,
+            bg: 'bg-gradient-to-br from-purple-500 to-fuchsia-600',
+            text: 'text-purple-600',
+            lightBg: 'bg-purple-50'
+        };
+        if (type === 'toast') return {
+            icon: MessageSquare,
+            bg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+            text: 'text-blue-600',
+            lightBg: 'bg-blue-50'
+        };
+        return {
+            icon: Bell,
+            bg: 'bg-gradient-to-br from-amber-500 to-orange-600',
+            text: 'text-amber-600',
+            lightBg: 'bg-amber-50'
+        };
     };
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex items-center justify-center h-96">
                 <div className="spinner"></div>
             </div>
         );
     }
 
     return (
-        <div>
-            <div className="flex items-center justify-between mb-6">
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Announcements</h1>
-                    <p className="text-gray-600 text-sm">Create popups and toast notifications for users</p>
+                    <h1 className="text-3xl font-bold text-slate-800">Announcements</h1>
+                    <p className="text-slate-500 mt-1">Engage your users with popups and notifications.</p>
                 </div>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="btn btn-primary flex items-center gap-2"
+                    className="btn bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-lg hover:shadow-orange-500/30 border-0"
                 >
                     <Plus size={20} />
-                    New Announcement
+                    Create Announcement
                 </button>
             </div>
 
-            {/* Announcements List */}
-            <div className="space-y-4">
-                {announcements.map((announcement) => (
-                    <div
-                        key={announcement.id}
-                        className={`bg-white rounded-xl shadow-sm p-6 border-l-4 ${announcement.is_active ? 'border-primary-500' : 'border-gray-300'
-                            }`}
-                    >
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-900">{announcement.title}</h3>
-                                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${announcement.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-                                        }`}>
-                                        {announcement.is_active ? 'Active' : 'Inactive'}
-                                    </span>
-                                    <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-xs font-medium">
-                                        {getTypeLabel(announcement.type)}
-                                    </span>
+            {/* Announcements Grid */}
+            {announcements.length > 0 ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {announcements.map((item) => {
+                        const styles = getTypeStyles(item.type);
+                        const TypeIcon = styles.icon;
+
+                        return (
+                            <div
+                                key={item.id}
+                                className={`group relative bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 ${!item.is_active ? 'opacity-70 grayscale-[0.5] hover:grayscale-0 hover:opacity-100' : ''}`}
+                            >
+                                {/* Active Indicator */}
+                                <div className={`absolute top-6 right-6 w-3 h-3 rounded-full ${item.is_active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-slate-300'}`} />
+
+                                {/* Icon */}
+                                <div className={`w-14 h-14 rounded-2xl ${styles.bg} p-[1px] mb-6 shadow-lg shadow-gray-200`}>
+                                    <div className="w-full h-full bg-white rounded-[15px] flex items-center justify-center">
+                                        <TypeIcon size={24} className={styles.text} />
+                                    </div>
                                 </div>
-                                <p className="text-gray-600 mb-3">{announcement.message}</p>
-                                <div className="flex gap-4 text-sm text-gray-500">
-                                    {announcement.start_date && (
-                                        <span>Start: {new Date(announcement.start_date).toLocaleDateString()}</span>
-                                    )}
-                                    {announcement.end_date && (
-                                        <span>End: {new Date(announcement.end_date).toLocaleDateString()}</span>
-                                    )}
-                                    <span>Created by: {announcement.created_by_name || 'Admin'}</span>
+
+                                <h3 className="text-lg font-bold text-slate-800 mb-2">{item.title}</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed mb-6 line-clamp-2 min-h-[40px]">
+                                    {item.message}
+                                </p>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg ${styles.lightBg} ${styles.text}`}>
+                                        {item.type}
+                                    </span>
+
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => setShowPreview(item)}
+                                            className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all"
+                                            title="Preview"
+                                        >
+                                            <Eye size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleOpenModal(item)}
+                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                                            title="Edit"
+                                        >
+                                            <Edit2 size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleToggle(item.id, item.is_active)}
+                                            className={`p-2 rounded-xl transition-all ${item.is_active
+                                                    ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
+                                                    : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                                                }`}
+                                            title={item.is_active ? 'Deactivate' : 'Activate'}
+                                        >
+                                            {item.is_active ? <AlertTriangle size={18} /> : <CheckCircle size={18} />}
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(item.id)}
+                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setPreviewType(announcement)}
-                                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                    title="Preview"
-                                >
-                                    <Eye size={18} />
-                                </button>
-                                <button
-                                    onClick={() => handleToggle(announcement.id)}
-                                    className={`p-2 rounded-lg transition-colors ${announcement.is_active
-                                            ? 'text-yellow-600 hover:bg-yellow-50'
-                                            : 'text-green-600 hover:bg-green-50'
-                                        }`}
-                                    title={announcement.is_active ? 'Deactivate' : 'Activate'}
-                                >
-                                    {announcement.is_active ? <BellOff size={18} /> : <Bell size={18} />}
-                                </button>
-                                <button
-                                    onClick={() => handleOpenModal(announcement)}
-                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                >
-                                    <Edit size={18} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(announcement.id)}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-16 text-center">
+                    <Bell size={48} className="mx-auto text-slate-300 mb-4" />
+                    <h3 className="text-lg font-bold text-slate-700">No announcements yet</h3>
+                    <p className="text-slate-500 mb-6 max-w-sm mx-auto">Create your first announcement to share updates, offers, or news with your customers.</p>
+                    <button onClick={() => handleOpenModal()} className="btn btn-primary">
+                        Create First Announcement
+                    </button>
+                </div>
+            )}
 
-                {announcements.length === 0 && (
-                    <div className="bg-white rounded-xl shadow-sm p-12 text-center text-gray-500">
-                        <Bell size={48} className="mx-auto mb-4 text-gray-300" />
-                        <p>No announcements yet. Create one to start engaging your users!</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Create/Edit Modal */}
+            {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between p-6 border-b">
-                            <h2 className="text-xl font-bold">
-                                {editingAnnouncement ? 'Edit Announcement' : 'New Announcement'}
-                            </h2>
-                            <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700">
-                                <X size={24} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={handleCloseModal} />
+
+                    <div className="relative bg-white rounded-3xl w-full max-w-md shadow-2xl animate-scale-in overflow-hidden">
+                        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-6 py-4 flex items-center justify-between">
+                            <h2 className="text-lg font-bold">{editingItem ? 'Edit Announcement' : 'New Announcement'}</h2>
+                            <button onClick={handleCloseModal} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
+                                <X size={20} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-semibold text-slate-700">Title</label>
                                 <input
                                     type="text"
-                                    name="title"
                                     value={formData.title}
-                                    onChange={handleChange}
-                                    className="input"
-                                    placeholder="e.g., New Year Sale!"
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all text-sm"
+                                    placeholder="e.g. Summer Sale!"
                                     required
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-semibold text-slate-700">Message</label>
                                 <textarea
-                                    name="message"
                                     value={formData.message}
-                                    onChange={handleChange}
-                                    className="input"
-                                    rows="3"
-                                    placeholder="e.g., Get 20% off on all products!"
+                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all text-sm min-h-[100px]"
+                                    placeholder="e.g. Get 50% off on all items..."
                                     required
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Display Type</label>
-                                <select
-                                    name="type"
-                                    value={formData.type}
-                                    onChange={handleChange}
-                                    className="input"
-                                >
-                                    <option value="both">Popup & Toast (Both)</option>
-                                    <option value="popup">Popup Only</option>
-                                    <option value="toast">Toast Only</option>
-                                </select>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Popup: Shows as a modal on page load. Toast: Shows as a notification bar near the header.
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                    <input
-                                        type="date"
-                                        name="startDate"
-                                        value={formData.startDate}
-                                        onChange={handleChange}
-                                        className="input"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                    <input
-                                        type="date"
-                                        name="endDate"
-                                        value={formData.endDate}
-                                        onChange={handleChange}
-                                        className="input"
-                                    />
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-semibold text-slate-700">Type</label>
+                                <div className="flex bg-slate-100 p-1.5 rounded-xl">
+                                    {['toast', 'popup', 'both'].map(type => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, type })}
+                                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold capitalize transition-all ${formData.type === type
+                                                    ? 'bg-white text-slate-800 shadow-sm'
+                                                    : 'text-slate-500 hover:text-slate-700'
+                                                }`}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="isActive"
-                                    id="isActive"
-                                    checked={formData.isActive}
-                                    onChange={handleChange}
-                                    className="w-4 h-4 text-primary-600 rounded"
-                                />
-                                <label htmlFor="isActive" className="text-sm text-gray-700">Active immediately</label>
+                            <div className="pt-2">
+                                <label className="flex items-center gap-3 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${formData.is_active ? 'bg-purple-600 border-purple-600' : 'border-slate-300'}`}>
+                                        {formData.is_active && <CheckCircle size={14} className="text-white" />}
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="hidden"
+                                        checked={formData.is_active}
+                                        onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                                    />
+                                    <span className="text-sm font-medium text-slate-700">Publish Immediately</span>
+                                </label>
                             </div>
 
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={handleCloseModal}
-                                    className="flex-1 btn btn-secondary"
-                                >
+                            <div className="flex gap-3 pt-2">
+                                <button type="button" onClick={handleCloseModal} className="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-slate-700 font-bold hover:bg-slate-50 transition-colors">
                                     Cancel
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={saving}
-                                    className="flex-1 btn btn-primary flex items-center justify-center gap-2"
-                                >
-                                    {saving ? <Loader2 className="animate-spin" size={20} /> : null}
-                                    {editingAnnouncement ? 'Update' : 'Create'}
+                                <button type="submit" disabled={saving} className="flex-1 btn btn-primary rounded-xl shadow-lg shadow-purple-500/20">
+                                    {saving ? <Loader2 className="animate-spin mx-auto" size={20} /> : (editingItem ? 'Update' : 'Create')}
                                 </button>
                             </div>
                         </form>
@@ -344,17 +324,23 @@ export default function AnnouncementManagement() {
             )}
 
             {/* Preview Modal */}
-            {previewType && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 text-center">
-                        <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Bell className="text-primary-600" size={24} />
+            {showPreview && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowPreview(null)} />
+
+                    <div className="relative bg-white rounded-3xl w-full max-w-sm p-8 text-center shadow-2xl animate-scale-in">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-amber-500" />
+
+                        <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <Megaphone className="text-purple-600" size={32} />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">{previewType.title}</h3>
-                        <p className="text-gray-600 mb-6">{previewType.message}</p>
+
+                        <h3 className="text-xl font-bold text-slate-900 mb-3">{showPreview.title}</h3>
+                        <p className="text-slate-600 mb-8 leading-relaxed">{showPreview.message}</p>
+
                         <button
-                            onClick={() => setPreviewType(null)}
-                            className="btn btn-primary w-full"
+                            onClick={() => setShowPreview(null)}
+                            className="w-full btn btn-primary py-3 rounded-xl shadow-lg shadow-purple-500/20"
                         >
                             Close Preview
                         </button>
