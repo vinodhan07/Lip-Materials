@@ -103,32 +103,10 @@ export default function Dashboard() {
 
     return (
         <div className="space-y-10 pb-8">
-            {/* Header with Date Filter */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
-                    <p className="text-slate-500 mt-1">Welcome back! Here's what's happening today.</p>
-                </div>
-
-                {/* Date Filter Pills */}
-                <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl">
-                    {[
-                        { key: 'today', label: 'Today' },
-                        { key: 'week', label: 'This Week' },
-                        { key: 'month', label: 'This Month' },
-                    ].map(({ key, label }) => (
-                        <button
-                            key={key}
-                            onClick={() => setDateFilter(key)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${dateFilter === key
-                                ? 'bg-white text-slate-800 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700'
-                                }`}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
+            {/* Page Header */}
+            <div>
+                <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
+                <p className="text-slate-500 mt-1">Welcome back! Here's what's happening today.</p>
             </div>
 
             {/* Stats Grid */}
@@ -164,20 +142,46 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Charts Row */}
-            {loading ? (
-                <div className="grid lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2"><SkeletonChart /></div>
-                    <SkeletonChart />
-                </div>
-            ) : (
-                <div className="grid lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2">
-                        <RevenueChart />
+            {/* Charts Section with Period Filter */}
+            <div className="space-y-4">
+                {/* Section Header with Date Filter */}
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-slate-800">Analytics Overview</h2>
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+                        {[
+                            { key: 'today', label: 'Today' },
+                            { key: 'week', label: 'This Week' },
+                            { key: 'month', label: 'This Month' },
+                        ].map(({ key, label }) => (
+                            <button
+                                key={key}
+                                onClick={() => setDateFilter(key)}
+                                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${dateFilter === key
+                                    ? 'bg-white text-slate-800 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
                     </div>
-                    <CategoryChart />
                 </div>
-            )}
+
+                {/* Charts Grid */}
+                {loading ? (
+                    <div className="grid lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2"><SkeletonChart /></div>
+                        <SkeletonChart />
+                    </div>
+                ) : (
+                    <div className="grid lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2">
+                            <RevenueChart />
+                        </div>
+                        <CategoryChart />
+                    </div>
+                )}
+            </div>
 
             {/* Quick Actions & Recent Activity */}
             <div className="grid lg:grid-cols-3 gap-8">
