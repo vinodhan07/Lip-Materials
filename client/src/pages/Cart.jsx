@@ -115,7 +115,7 @@ export default function Cart() {
                         {items.map((item) => {
                             const imageUrl = item.image_url
                                 ? (item.image_url.startsWith('http') ? item.image_url : `${API_URL}${item.image_url}`)
-                                : 'https://via.placeholder.com/100x100?text=No+Image';
+                                : 'https://placehold.co/100x100/EEE/999?text=No+Image';
 
                             return (
                                 <div key={item.id} className="bg-white rounded-2xl p-6 shadow-sm border border-purple-50 hover:shadow-lg hover:shadow-purple-500/5 transition-all">
@@ -125,7 +125,7 @@ export default function Cart() {
                                             alt={item.name}
                                             className="w-28 h-28 object-cover rounded-xl bg-purple-50"
                                             onError={(e) => {
-                                                e.target.src = 'https://via.placeholder.com/100x100?text=No+Image';
+                                                e.target.src = 'https://placehold.co/100x100/EEE/999?text=No+Image';
                                             }}
                                         />
                                         <div className="flex-1">

@@ -14,7 +14,7 @@ export default function RevenueChart({ data = null }) {
     const chartData = data || generateRevenueData();
 
     return (
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm" style={{ padding: '20px' }}>
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h3 className="text-lg font-bold text-slate-800">Revenue Overview</h3>
@@ -28,8 +28,8 @@ export default function RevenueChart({ data = null }) {
                 </div>
             </div>
 
-            <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="h-64 min-h-[200px]">
+                <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
                     <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                             <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">

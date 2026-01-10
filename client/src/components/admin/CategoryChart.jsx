@@ -13,14 +13,14 @@ export default function CategoryChart({ data = null }) {
     const chartData = data || generateCategoryData();
 
     return (
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm h-full">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm h-full" style={{ padding: '20px' }}>
             <div className="mb-4">
                 <h3 className="text-lg font-bold text-slate-800">Sales by Category</h3>
                 <p className="text-sm text-slate-500">Product distribution</p>
             </div>
 
-            <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="h-56 min-h-[180px]">
+                <ResponsiveContainer width="100%" height="100%" minWidth={150} minHeight={150}>
                     <PieChart>
                         <Pie
                             data={chartData}

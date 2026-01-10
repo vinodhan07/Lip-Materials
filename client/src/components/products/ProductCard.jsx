@@ -32,7 +32,7 @@ export default function ProductCard({ product }) {
 
     const imageUrl = product.image_url
         ? (product.image_url.startsWith('http') ? product.image_url : `${API_URL}${product.image_url}`)
-        : 'https://via.placeholder.com/300x300?text=No+Image';
+        : 'https://placehold.co/300x300/EEE/999?text=No+Image';
 
     return (
         <Link
@@ -46,7 +46,7 @@ export default function ProductCard({ product }) {
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';
+                        e.target.src = 'https://placehold.co/300x300/EEE/999?text=No+Image';
                     }}
                 />
 
@@ -58,8 +58,8 @@ export default function ProductCard({ product }) {
                     onClick={handleAddToCart}
                     disabled={product.stock <= 0}
                     className={`absolute bottom-4 left-4 right-4 py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transform translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ${product.stock <= 0
-                            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                            : 'bg-white text-purple-700 hover:bg-purple-50 shadow-lg'
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-white text-purple-700 hover:bg-purple-50 shadow-lg'
                         }`}
                 >
                     <ShoppingCart size={18} />

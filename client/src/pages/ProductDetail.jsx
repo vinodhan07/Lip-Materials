@@ -61,7 +61,7 @@ export default function ProductDetail() {
 
     const imageUrl = product.image_url
         ? (product.image_url.startsWith('http') ? product.image_url : `${API_URL}${product.image_url}`)
-        : 'https://via.placeholder.com/600x600?text=No+Image';
+        : 'https://placehold.co/600x600/EEE/999?text=No+Image';
 
     const features = [
         { icon: Truck, text: 'Free shipping on orders over ₹500' },
@@ -90,7 +90,7 @@ export default function ProductDetail() {
                                 alt={product.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                    e.target.src = 'https://via.placeholder.com/600x600?text=No+Image';
+                                    e.target.src = 'https://placehold.co/600x600/EEE/999?text=No+Image';
                                 }}
                             />
                         </div>

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, X, Loader2, Upload, Image, Filter, ChevronDown, MoreVertical } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Loader2, Upload, Image, Filter, ChevronDown, Package } from 'lucide-react';
 import { productsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import PageHeader from '../../components/admin/PageHeader';
+import SearchBar from '../../components/admin/SearchBar';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -138,6 +140,17 @@ export default function ProductManagement() {
         p.category?.toLowerCase().includes(search.toLowerCase())
     );
 
+    // Add Product Button
+    const AddProductButton = (
+        <button
+            onClick={() => handleOpenModal()}
+            className="btn bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:shadow-lg hover:shadow-purple-500/30 border-0"
+        >
+            <Plus size={20} />
+            Add New Product
+        </button>
+    );
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-96">
@@ -151,58 +164,55 @@ export default function ProductManagement() {
     return (
         <div className="space-y-8">
             {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Products</h1>
-                    <p className="text-slate-500 mt-1">Manage and organize your product catalog.</p>
-                </div>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="btn bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:shadow-lg hover:shadow-purple-500/30 border-0"
-                >
-                    <Plus size={20} />
-                    Add New Product
-                </button>
-            </div>
+            <PageHeader
+                title="Products"
+                subtitle="Manage and organize your product catalog."
+                actions={AddProductButton}
+            />
 
             {/* Filters & Search */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div className="relative w-full md:w-96">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                    <input
-                        type="text"
-                        placeholder="Search products by name or category..."
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 justify-between items-center" style={{ padding: '16px 20px' }}>
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <SearchBar
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 transition-all placeholder:text-slate-400"
+                        placeholder="Search products by name or category..."
+                        className="w-full md:w-80"
                     />
+                    <span className="text-sm text-slate-500 whitespace-nowrap hidden md:inline">
+                        {filteredProducts.length} products
+                    </span>
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-medium transition-colors">
-                        <Filter size={18} />
+                    <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-medium transition-colors text-sm">
+                        <Filter size={16} />
                         Filter
                     </button>
                 </div>
             </div>
 
             {/* Products Table */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                {/* Table Header */}
+                <div className="border-b border-slate-100" style={{ padding: '16px 20px' }}>
+                    <h3 className="font-bold text-slate-800">All Products</h3>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-slate-50/80 border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Product Info</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Price</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Stock</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                                <th style={{ padding: '12px 16px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Product Info</th>
+                                <th style={{ padding: '12px 16px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
+                                <th style={{ padding: '12px 16px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Price</th>
+                                <th style={{ padding: '12px 16px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Stock</th>
+                                <th style={{ padding: '12px 16px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th style={{ padding: '12px 16px' }} className="text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredProducts.map((product) => (
                                 <tr key={product.id} className="group hover:bg-purple-50/30 transition-colors">
-                                    <td className="px-6 py-4">
+                                    <td style={{ padding: '12px 16px' }}>
                                         <div className="flex items-center gap-4">
                                             <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0 border border-slate-200 group-hover:border-purple-200 transition-colors">
                                                 {product.image_url ? (
@@ -222,29 +232,29 @@ export default function ProductManagement() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className="inline-block px-3 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold">
+                                    <td style={{ padding: '12px 16px' }}>
+                                        <span className="inline-block px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold">
                                             {product.category || 'Uncategorized'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td style={{ padding: '12px 16px' }}>
                                         <span className="font-bold text-slate-800">₹{product.price?.toFixed(2)}</span>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td style={{ padding: '12px 16px' }}>
                                         <div className="flex items-center gap-2">
                                             <div className={`w-2 h-2 rounded-full ${product.stock > 10 ? 'bg-green-500' : product.stock > 0 ? 'bg-amber-500' : 'bg-red-500'}`} />
                                             <span className="text-sm text-slate-600 font-medium">{product.stock} units</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold border ${product.is_active
-                                                ? 'bg-green-50 text-green-700 border-green-200'
-                                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                                    <td style={{ padding: '12px 16px' }}>
+                                        <span className={`inline-flex px-3 py-1.5 rounded-full text-xs font-bold border ${product.is_active
+                                            ? 'bg-green-50 text-green-700 border-green-200'
+                                            : 'bg-slate-50 text-slate-500 border-slate-200'
                                             }`}>
                                             {product.is_active ? 'Active' : 'Inactive'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
+                                    <td style={{ padding: '12px 16px' }} className="text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => handleOpenModal(product)}

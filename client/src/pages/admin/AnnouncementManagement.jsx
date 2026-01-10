@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Eye, X, Loader2, Bell, MessageSquare, Megaphone, CheckCircle, AlertTriangle } from 'lucide-react';
 import { announcementsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import PageHeader from '../../components/admin/PageHeader';
 
 export default function AnnouncementManagement() {
     const [announcements, setAnnouncements] = useState([]);
@@ -141,22 +142,25 @@ export default function AnnouncementManagement() {
         );
     }
 
+    // Add Announcement Button
+    const AddButton = (
+        <button
+            onClick={() => handleOpenModal()}
+            className="btn bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-lg hover:shadow-orange-500/30 border-0"
+        >
+            <Plus size={20} />
+            Create Announcement
+        </button>
+    );
+
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Announcements</h1>
-                    <p className="text-slate-500 mt-1">Engage your users with popups and notifications.</p>
-                </div>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="btn bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-lg hover:shadow-orange-500/30 border-0"
-                >
-                    <Plus size={20} />
-                    Create Announcement
-                </button>
-            </div>
+            <PageHeader
+                title="Announcements"
+                subtitle="Engage your users with popups and notifications."
+                actions={AddButton}
+            />
 
             {/* Announcements Grid */}
             {announcements.length > 0 ? (
@@ -168,7 +172,8 @@ export default function AnnouncementManagement() {
                         return (
                             <div
                                 key={item.id}
-                                className={`group relative bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 ${!item.is_active ? 'opacity-70 grayscale-[0.5] hover:grayscale-0 hover:opacity-100' : ''}`}
+                                className={`group relative bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 ${!item.is_active ? 'opacity-70 grayscale-[0.5] hover:grayscale-0 hover:opacity-100' : ''}`}
+                                style={{ padding: '20px' }}
                             >
                                 {/* Active Indicator */}
                                 <div className={`absolute top-6 right-6 w-3 h-3 rounded-full ${item.is_active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-slate-300'}`} />
@@ -208,8 +213,8 @@ export default function AnnouncementManagement() {
                                         <button
                                             onClick={() => handleToggle(item.id, item.is_active)}
                                             className={`p-2 rounded-xl transition-all ${item.is_active
-                                                    ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
-                                                    : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                                                ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
+                                                : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
                                                 }`}
                                             title={item.is_active ? 'Deactivate' : 'Activate'}
                                         >
@@ -285,8 +290,8 @@ export default function AnnouncementManagement() {
                                             type="button"
                                             onClick={() => setFormData({ ...formData, type })}
                                             className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold capitalize transition-all ${formData.type === type
-                                                    ? 'bg-white text-slate-800 shadow-sm'
-                                                    : 'text-slate-500 hover:text-slate-700'
+                                                ? 'bg-white text-slate-800 shadow-sm'
+                                                : 'text-slate-500 hover:text-slate-700'
                                                 }`}
                                         >
                                             {type}

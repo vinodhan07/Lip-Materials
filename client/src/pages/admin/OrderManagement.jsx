@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Eye, X, ChevronDown, Package, CreditCard, Truck, User } from 'lucide-react';
+import { Eye, X, ChevronDown, Package, CreditCard, Truck, User } from 'lucide-react';
 import { ordersAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import PageHeader from '../../components/admin/PageHeader';
+import SearchBar from '../../components/admin/SearchBar';
 
 export default function OrderManagement() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
+    const [search, setSearch] = useState('');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [updating, setUpdating] = useState(null);
 
@@ -53,6 +56,23 @@ export default function OrderManagement() {
         return styles[status] || 'bg-slate-100 text-slate-600 border-slate-200';
     };
 
+    // Filter dropdown component
+    const FilterDropdown = (
+        <div className="relative group">
+            <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-purple-600 transition-colors" />
+            <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="appearance-none pl-5 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm hover:border-purple-300 transition-all capitalize"
+            >
+                <option value="all">All Statuses</option>
+                {statusOptions.map(status => (
+                    <option key={status} value={status} className="capitalize">{status}</option>
+                ))}
+            </select>
+        </div>
+    );
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-96">
@@ -62,32 +82,35 @@ export default function OrderManagement() {
     }
 
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Orders</h1>
-                    <p className="text-slate-500 mt-1">Track and manage your customer orders.</p>
-                </div>
+        <div className="space-y-6">
+            {/* Header with Filter */}
+            <PageHeader
+                title="Orders"
+                subtitle="Track and manage your customer orders."
+                actions={FilterDropdown}
+            />
 
-                {/* Filter Dropdown */}
-                <div className="relative group">
-                    <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-purple-600 transition-colors" />
-                    <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                        className="appearance-none pl-5 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm hover:border-purple-300 transition-all capitalize"
-                    >
-                        <option value="all">All Statuses</option>
-                        {statusOptions.map(status => (
-                            <option key={status} value={status} className="capitalize">{status}</option>
-                        ))}
-                    </select>
+            {/* Search Bar */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100" style={{ padding: '16px 20px' }}>
+                <div className="flex flex-col md:flex-row gap-4 items-center">
+                    <SearchBar
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search by order ID, customer name, or email..."
+                        className="w-full md:w-96"
+                    />
+                    <div className="text-sm text-slate-500">
+                        {orders.filter(o =>
+                            o.id?.toString().includes(search.toLowerCase()) ||
+                            o.user_name?.toLowerCase().includes(search.toLowerCase()) ||
+                            o.user_email?.toLowerCase().includes(search.toLowerCase())
+                        ).length} orders found
+                    </div>
                 </div>
             </div>
 
             {/* Orders Table */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-slate-50/80 border-b border-slate-100">
