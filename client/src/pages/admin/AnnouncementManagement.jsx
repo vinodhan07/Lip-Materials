@@ -154,7 +154,7 @@ export default function AnnouncementManagement() {
     );
 
     return (
-        <div className="space-y-8">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Header */}
             <PageHeader
                 title="Announcements"

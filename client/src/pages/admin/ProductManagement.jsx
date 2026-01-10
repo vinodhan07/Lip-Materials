@@ -162,7 +162,7 @@ export default function ProductManagement() {
     }
 
     return (
-        <div className="space-y-8">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Page Header */}
             <PageHeader
                 title="Products"

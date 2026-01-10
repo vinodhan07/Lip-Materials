@@ -141,7 +141,7 @@ export default function Dashboard() {
     ];
 
     return (
-        <div className="space-y-8">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Page Header */}
             <PageHeader
                 title="Dashboard"
@@ -159,7 +159,7 @@ export default function Dashboard() {
             </div>
 
             {/* Charts Section */}
-            <div style={{ marginTop: '32px' }}>
+            <div>
                 {/* Section Header with Date Filter */}
                 <div className="flex items-center justify-between" style={{ marginBottom: '20px' }}>
                     <h2 className="text-lg font-bold text-slate-800">Analytics Overview</h2>
@@ -201,7 +201,7 @@ export default function Dashboard() {
             </div>
 
             {/* Bottom Section: Recent Orders & Quick Actions */}
-            <div className="grid lg:grid-cols-3" style={{ gap: '24px', marginTop: '32px' }}>
+            <div className="grid lg:grid-cols-3" style={{ gap: '24px' }}>
                 {/* Recent Orders Table */}
                 <div className="lg:col-span-2">
                     <DataTable

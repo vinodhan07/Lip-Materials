@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, X, ChevronDown, Package, CreditCard, Truck, User } from 'lucide-react';
+import { Search, Eye, X, ChevronDown, Package, CreditCard, Truck, User } from 'lucide-react';
 import { ordersAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 import PageHeader from '../../components/admin/PageHeader';
@@ -82,7 +82,7 @@ export default function OrderManagement() {
     }
 
     return (
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Header with Filter */}
             <PageHeader
                 title="Orders"
@@ -111,6 +111,10 @@ export default function OrderManagement() {
 
             {/* Orders Table */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                {/* Table Title */}
+                <div className="border-b border-slate-100" style={{ padding: '16px 20px' }}>
+                    <h3 className="font-bold text-slate-800">All Orders</h3>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-slate-50/80 border-b border-slate-100">
