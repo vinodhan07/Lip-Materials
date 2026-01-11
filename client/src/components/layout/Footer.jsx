@@ -49,8 +49,8 @@ export default function Footer() {
                             </div>
                         </Link>
                         <p className="text-gray-400 mb-6 leading-relaxed">
-                            Premium packaging solutions that elevate your lip care products.
-                            Quality materials, sustainable options, and stunning designs.
+                            Premium packaging solutions that elevate your brand.
+                            Quality materials, sustainable options, and stunning designs for every product.
                         </p>
                         <div className="flex gap-3">
                             {[Facebook, Twitter, Instagram, Linkedin].map((Icon, index) => (

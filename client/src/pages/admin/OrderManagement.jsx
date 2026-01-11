@@ -140,12 +140,12 @@ export default function OrderManagement() {
                     <table className="w-full">
                         <thead className="bg-slate-50/80 border-b border-slate-100">
                             <tr>
-                                <th style={{ padding: '20px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Order Details</th>
-                                <th style={{ padding: '20px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
-                                <th style={{ padding: '20px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
-                                <th style={{ padding: '20px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                <th style={{ padding: '20px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                                <th style={{ padding: '20px 24px' }} className="text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
+                                <th style={{ padding: '12px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Order Details</th>
+                                <th style={{ padding: '12px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
+                                <th style={{ padding: '12px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
+                                <th style={{ padding: '12px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th style={{ padding: '12px 24px' }} className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                                <th style={{ padding: '12px 24px' }} className="text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">

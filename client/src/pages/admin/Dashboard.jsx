@@ -212,7 +212,7 @@ export default function Dashboard() {
             </div>
 
             {/* Bottom Section: Recent Orders & Quick Actions */}
-            <div className="grid lg:grid-cols-3" style={{ gap: '32px' }}>
+            <div className="grid lg:grid-cols-3" style={{ gap: '22px' }}>
                 {/* Recent Orders Table */}
                 <div className="lg:col-span-2">
                     <DataTable

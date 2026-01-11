@@ -48,6 +48,7 @@ export default function DataTable({
                                     key={col.key}
                                     className={`px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
                                         }`}
+                                    style={{ padding: '12px 26px' }}
                                 >
                                     {col.label}
                                 </th>
@@ -64,7 +65,8 @@ export default function DataTable({
                                 {columns.map((col) => (
                                     <td
                                         key={col.key}
-                                        className={`px-6 py-5 text-sm ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
+                                        style={{ padding: '10px 18px' }}
+                                        className={`text-sm ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
                                             }`}
                                     >
                                         {col.render
