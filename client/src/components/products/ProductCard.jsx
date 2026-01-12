@@ -49,7 +49,7 @@ export default function ProductCard({ product }) {
             aria-label={`View ${product.name} - ₹${product.price?.toFixed(2)}`}
         >
             {/* Image Container */}
-            <div className="relative aspect-square overflow-hidden bg-slate-50">
+            <div className="relative aspect-square overflow-hidden bg-luxury-800/50">
                 <img
                     src={imageUrl}
                     alt={product.name}
@@ -59,7 +59,7 @@ export default function ProductCard({ product }) {
                     width="300"
                     height="300"
                     onError={(e) => {
-                        e.target.src = 'https://placehold.co/300x300/f1f5f9/94a3b8?text=No+Image';
+                        e.target.src = 'https://placehold.co/300x300/1a0b2e/e2e8f0?text=No+Image';
                     }}
                 />
 
@@ -92,7 +92,7 @@ export default function ProductCard({ product }) {
 
                 {/* Category Badge */}
                 {product.category && (
-                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm border border-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-luxury-900/80 backdrop-blur-md border border-white/10 text-gold-400 text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm">
                         {product.category}
                     </span>
                 )}
@@ -123,7 +123,7 @@ export default function ProductCard({ product }) {
 
                 <div className="flex items-center justify-between border-t border-slate-50 mt-auto" style={{ paddingTop: '12px' }}>
                     <div>
-                        <span className="text-lg font-bold text-slate-900">
+                        <span className="text-lg font-bold text-white">
                             ₹{product.price?.toFixed(2)}
                         </span>
                         <span className="text-xs text-slate-400" style={{ marginLeft: '4px' }}>/unit</span>

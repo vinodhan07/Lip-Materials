@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Package, Box, Truck, Star, Shield, Zap, Award, ChevronRight, ShoppingBag } from 'lucide-react';
 import { productsAPI } from '../services/api';
@@ -7,9 +7,25 @@ import ProductCard from '../components/products/ProductCard';
 export default function Home() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTestimonial, setActiveTestimonial] = useState(0);
+    const heroRef = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: heroRef,
+        offset: ["start start", "end start"]
+    });
+
+    const heroY = useTransform(scrollYProgress, [0, 1], [0, 100]);
+    const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
     useEffect(() => {
         loadData();
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+        }, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const loadData = async () => {
@@ -82,7 +98,7 @@ export default function Home() {
                                 <span className="block bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-400 bg-clip-text text-transparent">
                                     For Your Business
                                 </span>
-                            </h1>
+                            </motion.h1>
 
                             <p className="text-purple-200/90 text-lg max-w-lg" style={{ marginBottom: '40px', lineHeight: '1.8' }}>
                                 Quality cardboard boxes, branded courier covers, and packaging tapes at wholesale prices.
@@ -106,7 +122,7 @@ export default function Home() {
                                 >
                                     Get Bulk Quote
                                 </Link>
-                            </div>
+                            </motion.div>
 
                             {/* Stats Row */}
                             <div className="flex flex-wrap justify-center lg:justify-start" style={{ gap: '40px' }}>
@@ -119,9 +135,6 @@ export default function Home() {
                                         <div className="text-2xl font-bold text-amber-400">{stat.value}</div>
                                         <div className="text-purple-300 text-sm">{stat.label}</div>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
 
                         {/* Right - Product Showcase */}
                         <div className="hidden lg:flex items-center justify-center relative">
@@ -160,10 +173,47 @@ export default function Home() {
                                         <div className="text-xs text-gray-500">Orders above ₹2000</div>
                                     </div>
                                 </div>
+
+                                {/* Floating Badge - Top Right */}
+                                <motion.div
+                                    animate={{ y: [0, -8, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="absolute -top-4 -right-4 bg-[#1a1225]/95 backdrop-blur-xl p-3 rounded-xl border border-white/10 shadow-xl"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                                            <CheckCircle size={16} className="text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <div className="text-white font-medium text-sm">Quality Verified</div>
+                                            <div className="text-xs text-gray-500">ISO Certified</div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                                {/* Floating Badge - Bottom Left */}
+                                <motion.div
+                                    animate={{ y: [0, 8, 0] }}
+                                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                    className="absolute -bottom-4 -left-4 bg-[#1a1225]/95 backdrop-blur-xl p-3 rounded-xl border border-white/10 shadow-xl"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex -space-x-1.5">
+                                            <div className="w-6 h-6 rounded-full bg-red-400 border-2 border-[#1a1225]" />
+                                            <div className="w-6 h-6 rounded-full bg-teal-400 border-2 border-[#1a1225]" />
+                                            <div className="w-6 h-6 rounded-full bg-yellow-400 border-2 border-[#1a1225]" />
+                                        </div>
+                                        <div>
+                                            <div className="text-white font-medium text-sm">500+ Brands</div>
+                                            <div className="text-xs text-gray-500">Trust Us</div>
+                                        </div>
+                                    </div>
+                                </motion.div>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
+            </section>
 
                 {/* Wave Divider */}
                 <div className="absolute bottom-0 left-0 right-0">
@@ -206,7 +256,7 @@ export default function Home() {
                         <p className="text-gray-600 max-w-2xl" style={{ margin: '0 auto' }}>
                             Quality packaging materials for all your shipping and storage needs
                         </p>
-                    </div>
+                    </motion.div>
 
                     {/* Categories Grid */}
                     <div className="grid md:grid-cols-3" style={{ gap: '32px' }}>
@@ -304,7 +354,7 @@ export default function Home() {
                             style={{ gap: '8px', marginTop: '16px' }}
                         >
                             View All Products
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
 
