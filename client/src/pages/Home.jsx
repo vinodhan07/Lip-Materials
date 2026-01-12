@@ -56,25 +56,24 @@ export default function Home() {
             {/* Hero Section */}
             <section className="relative min-h-screen flex items-center overflow-hidden">
                 {/* Background Gradient - Purple & Gold */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900" aria-hidden="true"></div>
 
-                {/* Animated Orbs */}
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute w-96 h-96 bg-amber-400/20 rounded-full blur-3xl animate-pulse" style={{ top: '10%', left: '5%' }}></div>
-                    <div className="absolute w-80 h-80 bg-purple-500/30 rounded-full blur-3xl animate-pulse" style={{ bottom: '10%', right: '10%', animationDelay: '1s' }}></div>
-                    <div className="absolute w-64 h-64 bg-yellow-400/20 rounded-full blur-3xl animate-pulse" style={{ top: '50%', left: '30%', animationDelay: '2s' }}></div>
+                {/* Simplified decorative elements for mobile performance */}
+                <div className="absolute inset-0 overflow-hidden hidden md:block" aria-hidden="true">
+                    <div className="absolute w-96 h-96 bg-amber-400/20 rounded-full" style={{ top: '10%', left: '5%', filter: 'blur(60px)' }}></div>
+                    <div className="absolute w-80 h-80 bg-purple-500/30 rounded-full" style={{ bottom: '10%', right: '10%', filter: 'blur(60px)' }}></div>
                 </div>
 
-                {/* Grid Pattern */}
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
+                {/* Grid Pattern - hidden on mobile */}
+                <div className="absolute inset-0 opacity-10 hidden md:block" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} aria-hidden="true"></div>
 
                 <div className="relative z-10 w-full" style={{ maxWidth: '1400px', margin: '0 auto', padding: '120px 32px 80px' }}>
                     <div className="grid lg:grid-cols-2 items-center" style={{ gap: '64px' }}>
                         {/* Left Content */}
                         <div className="text-center lg:text-left">
                             {/* Badge */}
-                            <div className="inline-flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full" style={{ gap: '8px', padding: '8px 20px', marginBottom: '32px' }}>
-                                <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                            <div className="inline-flex items-center bg-white/10 border border-white/20 rounded-full" style={{ gap: '8px', padding: '8px 20px', marginBottom: '32px' }}>
+                                <span className="w-2 h-2 bg-amber-400 rounded-full"></span>
                                 <span className="text-purple-200 text-sm font-medium">Wholesale Packaging Supplies</span>
                             </div>
 
