@@ -47,8 +47,8 @@ export default function Header() {
             role="banner"
             aria-label="Main navigation"
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-                ? 'bg-white/95 backdrop-blur-md shadow-lg shadow-purple-500/5'
-                : 'bg-white'
+                ? 'bg-luxury-900/90 backdrop-blur-md shadow-lg shadow-black/10'
+                : 'bg-transparent'
                 }`}
         >
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
@@ -76,7 +76,7 @@ export default function Header() {
                                 style={{ padding: '8px 16px' }}
                             >
                                 {link.label}
-                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-amber-500 group-hover:w-3/4 transition-all duration-300 rounded-full"></span>
+                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-gold-400 to-gold-600 group-hover:w-3/4 transition-all duration-300 rounded-full"></span>
                             </Link>
                         ))}
                     </nav>
