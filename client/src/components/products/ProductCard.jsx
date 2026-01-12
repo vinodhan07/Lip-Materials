@@ -1,24 +1,30 @@
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Star } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Star, ShieldCheck } from 'lucide-react';
 import useCartStore from '../../store/cartStore';
 import useAuthStore from '../../store/authStore';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function ProductCard({ product }) {
     const { addToCart } = useCartStore();
-    const { isAuthenticated } = useAuthStore();
+    const { isAuthenticated, isAdmin } = useAuthStore();
     const navigate = useNavigate();
 
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
 
+        // If not logged in, redirect to login
         if (!isAuthenticated) {
-            toast.error('Please login to add items to cart');
+            toast('Please login to add items to cart', { icon: '🔐' });
             navigate('/login');
+            return;
+        }
+
+        // If admin, show message that they can't purchase
+        if (isAdmin()) {
+            toast.error('Admins cannot add items to cart');
             return;
         }
 
@@ -33,6 +39,8 @@ export default function ProductCard({ product }) {
     const imageUrl = product.image_url
         ? (product.image_url.startsWith('http') ? product.image_url : `${API_URL}${product.image_url}`)
         : 'https://placehold.co/300x300/f1f5f9/94a3b8?text=No+Image';
+
+    const userIsAdmin = isAuthenticated && isAdmin();
 
     return (
         <Link
@@ -53,18 +61,28 @@ export default function ProductCard({ product }) {
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/5 transition-colors duration-300"></div>
 
-                {/* Quick Add Button */}
-                <button
-                    onClick={handleAddToCart}
-                    disabled={product.stock <= 0}
-                    className={`absolute bottom-3 left-3 right-3 py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transform translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ${product.stock <= 0
+                {/* Quick Add Button - Hidden for admins */}
+                {!userIsAdmin && (
+                    <button
+                        onClick={handleAddToCart}
+                        disabled={product.stock <= 0}
+                        className={`absolute bottom-3 left-3 right-3 py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transform translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ${product.stock <= 0
                             ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                             : 'bg-white text-purple-600 hover:bg-purple-50 shadow-sm'
-                        }`}
-                >
-                    <ShoppingCart size={16} />
-                    {product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
-                </button>
+                            }`}
+                    >
+                        <ShoppingCart size={16} />
+                        {product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                    </button>
+                )}
+
+                {/* Admin View-Only Badge */}
+                {userIsAdmin && (
+                    <div className="absolute bottom-3 left-3 right-3 py-2 px-4 rounded-xl bg-gray-800/80 backdrop-blur-sm flex items-center justify-center gap-2 text-sm text-white font-medium">
+                        <ShieldCheck size={16} />
+                        View Only (Admin)
+                    </div>
+                )}
 
                 {/* Category Badge */}
                 {product.category && (

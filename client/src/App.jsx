@@ -16,6 +16,7 @@ import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -119,6 +120,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MainLayout><Checkout /></MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <MainLayout><Orders /></MainLayout>
             </ProtectedRoute>
           }
         />
