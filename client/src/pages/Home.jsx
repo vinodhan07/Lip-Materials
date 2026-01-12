@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Package, Leaf, Palette, TrendingUp, Star, Shield, Truck, Sparkles } from 'lucide-react';
-import { productsAPI, announcementsAPI } from '../services/api';
+import { ArrowRight, Package, Box, Truck, Star, Shield, Zap, Award, ChevronRight, ShoppingBag } from 'lucide-react';
+import { productsAPI } from '../services/api';
 import ProductCard from '../components/products/ProductCard';
 
 export default function Home() {
@@ -14,8 +14,8 @@ export default function Home() {
 
     const loadData = async () => {
         try {
-            const productsRes = await productsAPI.getAll({ limit: 6 });
-            setProducts(productsRes.data.products.slice(0, 6));
+            const productsRes = await productsAPI.getAll({ limit: 8 });
+            setProducts(productsRes.data.products.slice(0, 8));
         } catch (error) {
             console.error('Failed to load data:', error);
         } finally {
@@ -23,111 +23,142 @@ export default function Home() {
         }
     };
 
-    const features = [
-        {
-            icon: Package,
-            title: 'Premium Quality',
-            description: 'High-grade materials ensuring durability and elegance for your luxury products.',
-            color: 'from-purple-500 to-purple-600',
-        },
-        {
-            icon: Leaf,
-            title: 'Eco-Friendly',
-            description: 'Sustainable packaging solutions with biodegradable and recycled materials.',
-            color: 'from-emerald-500 to-emerald-600',
-        },
-        {
-            icon: Palette,
-            title: 'Custom Designs',
-            description: 'Personalized packaging with your brand colors, logo, and unique styling.',
-            color: 'from-amber-500 to-amber-600',
-        },
-        {
-            icon: TrendingUp,
-            title: 'Bulk Orders',
-            description: 'Competitive pricing for wholesale and bulk purchases with fast delivery.',
-            color: 'from-blue-500 to-blue-600',
-        },
+    const categories = [
+        { name: 'Cardboard Boxes', icon: '📦', desc: 'All sizes available', color: 'from-purple-500 to-indigo-500', link: '/products?category=boxes' },
+        { name: 'Courier Covers', icon: '📮', desc: 'Amazon, Flipkart & more', color: 'from-amber-500 to-yellow-500', link: '/products?category=covers' },
+        { name: 'Packaging Tapes', icon: '🎗️', desc: 'Branded & Plain', color: 'from-purple-600 to-purple-700', link: '/products?category=tapes' },
     ];
 
-    const stats = [
-        { value: '10K+', label: 'Products Delivered' },
-        { value: '500+', label: 'Happy Clients' },
-        { value: '50+', label: 'Design Options' },
-        { value: '99%', label: 'Satisfaction Rate' },
+    const benefits = [
+        { icon: Zap, title: 'Fast Delivery', desc: 'Same day dispatch for orders before 2 PM', color: 'bg-amber-500' },
+        { icon: Shield, title: 'Quality Assured', desc: 'Premium quality packaging materials', color: 'bg-purple-500' },
+        { icon: Award, title: 'Best Prices', desc: 'Wholesale rates for retailers', color: 'bg-amber-600' },
+        { icon: Truck, title: 'Pan India Shipping', desc: 'We deliver across all states', color: 'bg-purple-600' },
+    ];
+
+    const boxSizes = ['3x3', '4x4', '5x5', '6x6', '8x8', '10x10', '12x12', '14x14'];
+
+    const brandedCovers = [
+        { name: 'Amazon', color: 'bg-[#FF9900]' },
+        { name: 'Flipkart', color: 'bg-[#2874F0]' },
+        { name: 'Meesho', color: 'bg-[#F43397]' },
+        { name: 'Myntra', color: 'bg-[#FF3E6C]' },
+    ];
+
+    const testimonials = [
+        { name: 'Rajesh Kumar', role: 'E-commerce Seller', text: 'Best quality boxes at wholesale prices. My packaging costs reduced by 30%!', avatar: 'R', rating: 5 },
+        { name: 'Priya Sharma', role: 'Online Retailer', text: 'Fast delivery and excellent quality courier covers. Highly recommended!', avatar: 'P', rating: 5 },
+        { name: 'Amit Patel', role: 'Business Owner', text: 'One-stop shop for all packaging needs. Great customer service!', avatar: 'A', rating: 5 },
     ];
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-white">
             {/* Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-                {/* Animated Background */}
-                <div className="absolute inset-0">
-                    <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/30 rounded-full blur-3xl animate-float"></div>
-                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-2s' }}></div>
-                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-4s' }}></div>
+            <section className="relative min-h-screen flex items-center overflow-hidden">
+                {/* Background Gradient - Purple & Gold */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900"></div>
+
+                {/* Animated Orbs */}
+                <div className="absolute inset-0 overflow-hidden">
+                    <div className="absolute w-96 h-96 bg-amber-400/20 rounded-full blur-3xl animate-pulse" style={{ top: '10%', left: '5%' }}></div>
+                    <div className="absolute w-80 h-80 bg-purple-500/30 rounded-full blur-3xl animate-pulse" style={{ bottom: '10%', right: '10%', animationDelay: '1s' }}></div>
+                    <div className="absolute w-64 h-64 bg-yellow-400/20 rounded-full blur-3xl animate-pulse" style={{ top: '50%', left: '30%', animationDelay: '2s' }}></div>
                 </div>
 
-                {/* Grid Pattern Overlay */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+                {/* Grid Pattern */}
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
 
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="text-center lg:text-left animate-slide-up">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-purple-200 text-sm font-medium mb-6">
-                                <Sparkles size={16} className="text-amber-400" />
-                                Premium Packaging Solutions
+                <div className="relative z-10 w-full" style={{ maxWidth: '1400px', margin: '0 auto', padding: '120px 32px 80px' }}>
+                    <div className="grid lg:grid-cols-2 items-center" style={{ gap: '64px' }}>
+                        {/* Left Content */}
+                        <div className="text-center lg:text-left">
+                            {/* Badge */}
+                            <div className="inline-flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full" style={{ gap: '8px', padding: '8px 20px', marginBottom: '32px' }}>
+                                <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                                <span className="text-purple-200 text-sm font-medium">Wholesale Packaging Supplies</span>
                             </div>
 
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-                                Elevate Your Brand with
-                                <span className="block mt-2 bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
-                                    Premium Packaging
+                            <h1 className="text-white font-bold leading-tight" style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', marginBottom: '24px' }}>
+                                Premium Packaging
+                                <span className="block bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-400 bg-clip-text text-transparent">
+                                    For Your Business
                                 </span>
                             </h1>
 
-                            <p className="text-lg text-purple-200/80 mb-8 max-w-xl mx-auto lg:mx-0">
-                                Transform your lip products with our exquisite packaging solutions.
-                                From luxury gift boxes to sustainable containers, we craft packaging that tells your brand story.
+                            <p className="text-purple-200/90 text-lg max-w-lg" style={{ marginBottom: '40px', lineHeight: '1.8' }}>
+                                Quality cardboard boxes, branded courier covers, and packaging tapes at wholesale prices.
+                                Perfect for e-commerce sellers, retailers, and businesses.
                             </p>
 
-                            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                            {/* CTA Buttons */}
+                            <div className="flex flex-wrap justify-center lg:justify-start" style={{ gap: '16px', marginBottom: '48px' }}>
                                 <Link
                                     to="/products"
-                                    className="btn btn-accent text-lg px-8 py-4"
+                                    className="group inline-flex items-center bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold rounded-full shadow-lg shadow-amber-500/30 transition-all"
+                                    style={{ gap: '8px', padding: '18px 36px' }}
                                 >
-                                    Explore Products
-                                    <ArrowRight size={20} />
+                                    Shop Now
+                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                                 </Link>
                                 <Link
                                     to="/contact"
-                                    className="btn btn-ghost text-white border-2 border-white/30 hover:bg-white/10 px-8 py-4"
+                                    className="inline-flex items-center bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 transition-all"
+                                    style={{ gap: '8px', padding: '18px 36px' }}
                                 >
-                                    Get Custom Quote
+                                    Get Bulk Quote
                                 </Link>
                             </div>
 
-                            {/* Trust Badges */}
-                            <div className="flex items-center gap-6 mt-10 justify-center lg:justify-start">
-                                {[Shield, Truck, Star].map((Icon, i) => (
-                                    <div key={i} className="flex items-center gap-2 text-purple-300 text-sm">
-                                        <Icon size={18} className="text-amber-400" />
-                                        <span>{['Secure', 'Free Shipping', '5★ Rated'][i]}</span>
+                            {/* Stats Row */}
+                            <div className="flex flex-wrap justify-center lg:justify-start" style={{ gap: '40px' }}>
+                                {[
+                                    { value: '5000+', label: 'Happy Customers' },
+                                    { value: '50+', label: 'Products' },
+                                    { value: '4.9★', label: 'Rating' },
+                                ].map((stat, i) => (
+                                    <div key={i} className="text-center lg:text-left">
+                                        <div className="text-2xl font-bold text-amber-400">{stat.value}</div>
+                                        <div className="text-purple-300 text-sm">{stat.label}</div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Hero Image/3D Element */}
-                        <div className="hidden lg:block relative">
-                            <div className="relative w-full aspect-square">
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-amber-500/20 rounded-3xl backdrop-blur-sm border border-white/10"></div>
-                                <div className="absolute inset-4 bg-gradient-to-br from-white/5 to-white/0 rounded-2xl flex items-center justify-center">
-                                    <div className="text-center">
-                                        <div className="w-32 h-32 mx-auto bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-2xl shadow-amber-500/30 flex items-center justify-center mb-6 animate-float">
-                                            <Package size={48} className="text-white" />
+                        {/* Right - Product Showcase */}
+                        <div className="hidden lg:flex items-center justify-center relative">
+                            <div className="relative">
+                                {/* Glow Effect */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-amber-400/20 to-purple-500/20 rounded-3xl blur-3xl scale-110"></div>
+
+                                {/* Product Grid */}
+                                <div className="relative bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden" style={{ padding: '32px' }}>
+                                    <div className="grid grid-cols-2" style={{ gap: '16px' }}>
+                                        {categories.map((cat, i) => (
+                                            <Link
+                                                key={i}
+                                                to={cat.link}
+                                                className="bg-white/10 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center hover:bg-white/20 transition-all cursor-pointer"
+                                                style={{ padding: '28px', aspectRatio: i === 2 ? 'auto' : '1' }}
+                                            >
+                                                <span style={{ fontSize: '40px', marginBottom: '12px' }}>{cat.icon}</span>
+                                                <span className="text-white font-semibold text-sm">{cat.name}</span>
+                                            </Link>
+                                        ))}
+                                        <div className="bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex flex-col items-center justify-center" style={{ padding: '28px' }}>
+                                            <span className="text-3xl font-bold text-purple-900">50+</span>
+                                            <span className="text-purple-800 text-sm font-medium">Products</span>
                                         </div>
-                                        <p className="text-white/60 text-sm">Premium Packaging Collection</p>
+                                    </div>
+                                </div>
+
+                                {/* Floating Badge */}
+                                <div className="absolute bg-white rounded-2xl shadow-2xl flex items-center" style={{ gap: '12px', padding: '16px 20px', top: '-20px', right: '-20px' }}>
+                                    <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                        <Truck className="text-purple-600" size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-bold text-gray-800">Free Shipping</div>
+                                        <div className="text-xs text-gray-500">Orders above ₹2000</div>
                                     </div>
                                 </div>
                             </div>
@@ -137,120 +168,245 @@ export default function Home() {
 
                 {/* Wave Divider */}
                 <div className="absolute bottom-0 left-0 right-0">
-                    <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#f8f7ff" />
+                    <svg viewBox="0 0 1440 120" fill="none" preserveAspectRatio="none" style={{ width: '100%', height: '120px' }}>
+                        <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H0Z" fill="white" />
                     </svg>
                 </div>
             </section>
 
-            {/* Stats Section */}
-            <section className="bg-[#f8f7ff] py-8 -mt-1">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {stats.map((stat, index) => (
-                            <div key={index} className="text-center">
-                                <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
-                                    {stat.value}
+            {/* Benefits Bar */}
+            <section className="bg-white relative" style={{ marginTop: '-1px' }}>
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 32px' }}>
+                    <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: '24px' }}>
+                        {benefits.map((benefit, i) => (
+                            <div key={i} className="flex items-center" style={{ gap: '16px' }}>
+                                <div className={`w-12 h-12 ${benefit.color} rounded-xl flex items-center justify-center shadow-lg`}>
+                                    <benefit.icon className="text-white" size={24} />
                                 </div>
-                                <div className="text-gray-500 text-sm mt-1">{stat.label}</div>
+                                <div>
+                                    <div className="font-bold text-gray-800">{benefit.title}</div>
+                                    <div className="text-sm text-gray-500">{benefit.desc}</div>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section className="py-20 bg-[#f8f7ff]">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <span className="text-purple-600 font-semibold text-sm uppercase tracking-wider">Why Choose Us</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4">
-                            Crafted with Excellence
+            {/* Categories Section */}
+            <section className="bg-purple-50" style={{ padding: '100px 0' }}>
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 32px' }}>
+                    {/* Section Header */}
+                    <div className="text-center" style={{ marginBottom: '64px' }}>
+                        <span className="inline-block bg-purple-100 text-purple-600 text-sm font-bold uppercase tracking-wider rounded-full" style={{ padding: '8px 20px', marginBottom: '16px' }}>
+                            Our Products
+                        </span>
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900" style={{ marginBottom: '16px' }}>
+                            Shop by Category
                         </h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">
-                            We're committed to providing the best packaging solutions that make your products stand out.
+                        <p className="text-gray-600 max-w-2xl" style={{ margin: '0 auto' }}>
+                            Quality packaging materials for all your shipping and storage needs
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {features.map((feature, index) => (
-                            <div
-                                key={index}
-                                className="group bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-purple-50 hover:border-purple-100"
-                            >
-                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                    <feature.icon className="text-white" size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                                <p className="text-gray-500 leading-relaxed">{feature.description}</p>
+                    {/* Categories Grid */}
+                    <div className="grid md:grid-cols-3" style={{ gap: '32px' }}>
+                        {/* Cardboard Boxes */}
+                        <Link
+                            to="/products?category=boxes"
+                            className="group relative bg-white rounded-3xl border border-gray-100 hover:border-purple-200 hover:shadow-xl hover:shadow-purple-500/10 transition-all overflow-hidden"
+                            style={{ padding: '40px' }}
+                        >
+                            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ marginBottom: '24px', fontSize: '40px' }}>
+                                📦
                             </div>
-                        ))}
+                            <h3 className="text-2xl font-bold text-gray-800" style={{ marginBottom: '8px' }}>Cardboard Boxes</h3>
+                            <p className="text-gray-500" style={{ marginBottom: '16px' }}>All sizes available for shipping & storage</p>
+                            <div className="flex flex-wrap" style={{ gap: '8px' }}>
+                                {boxSizes.slice(0, 4).map((size, i) => (
+                                    <span key={i} className="bg-purple-50 text-purple-700 text-xs font-medium rounded-lg" style={{ padding: '4px 10px' }}>
+                                        {size} inch
+                                    </span>
+                                ))}
+                                <span className="bg-gray-100 text-gray-600 text-xs font-medium rounded-lg" style={{ padding: '4px 10px' }}>
+                                    +more
+                                </span>
+                            </div>
+                            <div className="absolute bottom-6 right-6 w-10 h-10 bg-gray-100 group-hover:bg-purple-500 rounded-full flex items-center justify-center transition-all">
+                                <ChevronRight size={20} className="text-gray-400 group-hover:text-white transition-colors" />
+                            </div>
+                        </Link>
+
+                        {/* Courier Covers */}
+                        <Link
+                            to="/products?category=covers"
+                            className="group relative bg-white rounded-3xl border border-gray-100 hover:border-amber-200 hover:shadow-xl hover:shadow-amber-500/10 transition-all overflow-hidden"
+                            style={{ padding: '40px' }}
+                        >
+                            <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ marginBottom: '24px', fontSize: '40px' }}>
+                                📮
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800" style={{ marginBottom: '8px' }}>Courier Covers</h3>
+                            <p className="text-gray-500" style={{ marginBottom: '16px' }}>Branded & plain courier bags</p>
+                            <div className="flex flex-wrap" style={{ gap: '8px' }}>
+                                {brandedCovers.map((brand, i) => (
+                                    <span key={i} className={`${brand.color} text-white text-xs font-medium rounded-lg`} style={{ padding: '4px 10px' }}>
+                                        {brand.name}
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="absolute bottom-6 right-6 w-10 h-10 bg-gray-100 group-hover:bg-amber-500 rounded-full flex items-center justify-center transition-all">
+                                <ChevronRight size={20} className="text-gray-400 group-hover:text-white transition-colors" />
+                            </div>
+                        </Link>
+
+                        {/* Tapes */}
+                        <Link
+                            to="/products?category=tapes"
+                            className="group relative bg-white rounded-3xl border border-gray-100 hover:border-purple-200 hover:shadow-xl hover:shadow-purple-500/10 transition-all overflow-hidden"
+                            style={{ padding: '40px' }}
+                        >
+                            <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ marginBottom: '24px', fontSize: '40px' }}>
+                                🎗️
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800" style={{ marginBottom: '8px' }}>Packaging Tapes</h3>
+                            <p className="text-gray-500" style={{ marginBottom: '16px' }}>Branded & colored tapes</p>
+                            <div className="flex flex-wrap" style={{ gap: '8px' }}>
+                                {['Amazon', 'Flipkart', 'Black', 'White'].map((tape, i) => (
+                                    <span key={i} className="bg-purple-50 text-purple-700 text-xs font-medium rounded-lg" style={{ padding: '4px 10px' }}>
+                                        {tape}
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="absolute bottom-6 right-6 w-10 h-10 bg-gray-100 group-hover:bg-purple-600 rounded-full flex items-center justify-center transition-all">
+                                <ChevronRight size={20} className="text-gray-400 group-hover:text-white transition-colors" />
+                            </div>
+                        </Link>
                     </div>
                 </div>
             </section>
 
             {/* Featured Products */}
-            <section className="py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12">
+            <section className="bg-white" style={{ padding: '100px 0' }}>
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 32px' }}>
+                    {/* Section Header */}
+                    <div className="flex flex-col md:flex-row items-start md:items-end justify-between" style={{ marginBottom: '48px' }}>
                         <div>
-                            <span className="text-purple-600 font-semibold text-sm uppercase tracking-wider">Our Collection</span>
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Featured Products</h2>
+                            <span className="inline-block bg-amber-100 text-amber-600 text-sm font-bold uppercase tracking-wider rounded-full" style={{ padding: '8px 20px', marginBottom: '16px' }}>
+                                Best Sellers
+                            </span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                                Popular Products
+                            </h2>
                         </div>
                         <Link
                             to="/products"
-                            className="mt-4 md:mt-0 inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold group"
+                            className="inline-flex items-center text-purple-600 hover:text-purple-700 font-semibold group"
+                            style={{ gap: '8px', marginTop: '16px' }}
                         >
                             View All Products
                             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
 
+                    {/* Products Grid */}
                     {loading ? (
-                        <div className="flex justify-center py-20">
+                        <div className="flex justify-center" style={{ padding: '80px 0' }}>
                             <div className="spinner"></div>
                         </div>
                     ) : products.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {products.map((product) => (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: '24px' }}>
+                            {products.slice(0, 8).map((product) => (
                                 <ProductCard key={product.id} product={product} />
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-20 text-gray-500">
-                            No products available yet.
+                        <div className="text-center text-gray-500 bg-gray-50 rounded-3xl" style={{ padding: '80px' }}>
+                            <ShoppingBag size={48} className="text-gray-300" style={{ margin: '0 auto 16px' }} />
+                            <p className="text-lg font-medium">No products available yet.</p>
                         </div>
                     )}
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="py-20 bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-                <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl"></div>
+            {/* Testimonials Section */}
+            <section className="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 relative overflow-hidden" style={{ padding: '100px 0' }}>
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
 
-                <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                        Ready to Transform Your Brand?
-                    </h2>
-                    <p className="text-purple-200 text-lg mb-10 max-w-2xl mx-auto">
-                        Get custom packaging solutions tailored to your unique brand identity.
-                        Let's create something extraordinary together.
-                    </p>
-                    <div className="flex flex-wrap gap-4 justify-center">
-                        <Link
-                            to="/contact"
-                            className="btn btn-accent text-lg px-8 py-4"
-                        >
-                            Start Your Project
-                            <ArrowRight size={20} />
-                        </Link>
-                        <Link
-                            to="/products"
-                            className="btn text-white border-2 border-white/30 hover:bg-white/10 px-8 py-4"
-                        >
-                            Browse Catalog
-                        </Link>
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 32px' }} className="relative z-10">
+                    <div className="text-center" style={{ marginBottom: '64px' }}>
+                        <span className="inline-block bg-white/10 text-purple-200 text-sm font-bold uppercase tracking-wider rounded-full backdrop-blur-sm" style={{ padding: '8px 20px', marginBottom: '16px' }}>
+                            Testimonials
+                        </span>
+                        <h2 className="text-3xl md:text-4xl font-bold text-white" style={{ marginBottom: '16px' }}>
+                            What Our Customers Say
+                        </h2>
+                        <p className="text-purple-300 max-w-2xl" style={{ margin: '0 auto' }}>
+                            Trusted by thousands of e-commerce sellers and businesses across India
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3" style={{ gap: '24px' }}>
+                        {testimonials.map((testimonial, i) => (
+                            <div key={i} className="bg-white/10 backdrop-blur-md rounded-3xl border border-white/10 hover:bg-white/15 transition-all" style={{ padding: '32px' }}>
+                                {/* Stars */}
+                                <div className="flex" style={{ marginBottom: '20px', gap: '4px' }}>
+                                    {[...Array(testimonial.rating)].map((_, j) => (
+                                        <Star key={j} size={18} className="text-amber-400 fill-amber-400" />
+                                    ))}
+                                </div>
+                                <p className="text-white/90 leading-relaxed" style={{ marginBottom: '24px' }}>
+                                    "{testimonial.text}"
+                                </p>
+                                <div className="flex items-center" style={{ gap: '12px' }}>
+                                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center text-purple-900 font-bold">
+                                        {testimonial.avatar}
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-white">{testimonial.name}</div>
+                                        <div className="text-sm text-purple-300">{testimonial.role}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="bg-white" style={{ padding: '100px 0' }}>
+                <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 32px', textAlign: 'center' }}>
+                    <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 rounded-3xl relative overflow-hidden" style={{ padding: '80px 48px' }}>
+                        {/* Decorative Elements */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400/20 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400/30 rounded-full blur-3xl"></div>
+
+                        <div className="relative z-10">
+                            <h2 className="text-3xl md:text-4xl font-bold text-white" style={{ marginBottom: '16px' }}>
+                                Need Bulk Packaging?
+                            </h2>
+                            <p className="text-purple-200 text-lg max-w-lg" style={{ margin: '0 auto 32px' }}>
+                                Get special wholesale prices for large orders. Contact us for custom quotes and exclusive deals.
+                            </p>
+                            <div className="flex flex-wrap justify-center" style={{ gap: '16px' }}>
+                                <Link
+                                    to="/products"
+                                    className="inline-flex items-center bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold rounded-full shadow-lg transition-all"
+                                    style={{ gap: '8px', padding: '18px 36px' }}
+                                >
+                                    Browse Products
+                                    <ArrowRight size={20} />
+                                </Link>
+                                <Link
+                                    to="/contact"
+                                    className="inline-flex items-center bg-white/20 hover:bg-white/30 text-white font-semibold rounded-full border border-white/30 transition-all"
+                                    style={{ gap: '8px', padding: '18px 36px' }}
+                                >
+                                    Contact Us
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
