@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X, LogOut, LayoutDashboard, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import useAuthStore from '../../store/authStore';
@@ -10,6 +10,7 @@ export default function Header() {
     const { isAuthenticated, user, logout, isAdmin } = useAuthStore();
     const { items, fetchCart } = useCartStore();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -42,9 +43,13 @@ export default function Header() {
         { to: '/contact', label: 'Contact' },
     ];
 
-    const textColor = isScrolled ? 'text-gray-700' : 'text-white';
-    const hoverColor = isScrolled ? 'hover:text-purple-600' : 'hover:text-amber-400';
-    const iconBg = isScrolled ? 'bg-purple-50' : 'bg-white/10';
+    // Check if on home page - only use transparent header styles on home
+    const isHomePage = location.pathname === '/';
+    const shouldUseDarkText = isScrolled || !isHomePage;
+
+    const textColor = shouldUseDarkText ? 'text-gray-700' : 'text-white';
+    const hoverColor = shouldUseDarkText ? 'hover:text-purple-600' : 'hover:text-amber-400';
+    const iconBg = shouldUseDarkText ? 'bg-purple-50' : 'bg-white/10';
 
     return (
         <header
@@ -63,7 +68,7 @@ export default function Header() {
                             <Package className="text-white" size={20} />
                         </div>
                         <div className="flex flex-col">
-                            <span className={`text-xl font-bold bg-clip-text text-transparent ${isScrolled ? 'bg-gradient-to-r from-purple-700 to-purple-900' : 'bg-gradient-to-r from-white to-purple-200'}`}>
+                            <span className={`text-xl font-bold bg-clip-text text-transparent ${shouldUseDarkText ? 'bg-gradient-to-r from-purple-700 to-purple-900' : 'bg-gradient-to-r from-white to-purple-200'}`}>
                                 LIP Materials
                             </span>
                             <span className="text-[10px] text-amber-500 font-medium tracking-wider" style={{ marginTop: '-2px' }}>PACKAGING SUPPLIES</span>

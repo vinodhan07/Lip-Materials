@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, Package, Check, Star, Truck, Shield, RotateCcw, ShieldCheck, Heart, Share2, ChevronLeft, Sparkles } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Package, Check, Star, Truck, Shield, RotateCcw, ShieldCheck, Heart, Share2, ChevronLeft, ChevronRight, Sparkles, Box, Info } from 'lucide-react';
 import { productsAPI } from '../services/api';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
+import ProductCard from '../components/products/ProductCard';
 import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -12,20 +13,34 @@ export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const { addToCart } = useCartStore();
     const { isAuthenticated, isAdmin } = useAuthStore();
 
     useEffect(() => {
         loadProduct();
+        window.scrollTo(0, 0);
     }, [id]);
 
     const loadProduct = async () => {
         try {
             const response = await productsAPI.getById(id);
             setProduct(response.data.product);
+
+            // Load related products from the same category
+            if (response.data.product?.category) {
+                const relatedRes = await productsAPI.getAll({
+                    category: response.data.product.category,
+                    limit: 4
+                });
+                setRelatedProducts(
+                    relatedRes.data.products.filter(p => p.id !== response.data.product.id).slice(0, 4)
+                );
+            }
         } catch (error) {
             console.error('Failed to load product:', error);
             toast.error('Product not found');
@@ -55,9 +70,29 @@ export default function ProductDetail() {
         }
     };
 
+    const handleBuyNow = async () => {
+        if (!isAuthenticated) {
+            toast('Please login to continue', { icon: '🔐' });
+            navigate('/login?redirect=/checkout');
+            return;
+        }
+
+        if (isAdmin()) {
+            toast.error('Admins cannot purchase products');
+            return;
+        }
+
+        const result = await addToCart(product.id, quantity);
+        if (result.success) {
+            navigate('/cart');
+        } else {
+            toast.error(result.error);
+        }
+    };
+
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50/50 to-white" style={{ paddingTop: '64px' }}>
+            <div className="min-h-screen flex items-center justify-center bg-white" style={{ paddingTop: '80px' }}>
                 <div className="spinner"></div>
             </div>
         );
@@ -65,27 +100,34 @@ export default function ProductDetail() {
 
     if (!product) return null;
 
-    const imageUrl = product.image_url
-        ? (product.image_url.startsWith('http') ? product.image_url : `${API_URL}${product.image_url}`)
-        : 'https://placehold.co/600x600/EEE/999?text=No+Image';
+    // Generate image array (for now just the main image, but prepared for multiple)
+    const images = product.image_url
+        ? [product.image_url.startsWith('http') ? product.image_url : `${API_URL}${product.image_url}`]
+        : ['https://placehold.co/600x600/f8f8f8/999?text=No+Image'];
 
     const userIsAdmin = isAuthenticated && isAdmin();
 
-    const benefits = [
-        { icon: Truck, title: 'Free Delivery', desc: 'On orders above ₹2000' },
-        { icon: Shield, title: 'Quality Assured', desc: 'Premium materials only' },
-        { icon: RotateCcw, title: 'Easy Returns', desc: '30-day return policy' },
+    // Calculate prices
+    const originalPrice = product.price * 1.2;
+    const discountPercent = 20;
+
+    // Product specifications (can be extended based on product data)
+    const specifications = [
+        { label: 'SKU', value: `PM-${String(product.id).padStart(4, '0')}` },
+        { label: 'Category', value: product.category || 'General' },
+        { label: 'Stock', value: `${product.stock} units` },
+        { label: 'Material', value: 'Premium Quality' },
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-amber-50/20">
-            {/* Top Navigation Bar */}
-            <div className="fixed top-16 lg:top-20 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-purple-100 z-30" style={{ padding: '12px 24px' }}>
-                <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <div className="min-h-screen bg-white">
+            {/* Breadcrumb Navigation */}
+            <div className="bg-gray-50 border-b border-gray-100" style={{ paddingTop: '80px' }}>
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px 24px' }}>
                     <div className="flex items-center justify-between">
                         <button
                             onClick={() => navigate('/products')}
-                            className="flex items-center text-gray-600 hover:text-purple-600 transition-colors"
+                            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
                             style={{ gap: '8px' }}
                         >
                             <ChevronLeft size={20} />
@@ -94,11 +136,11 @@ export default function ProductDetail() {
                         <div className="flex items-center" style={{ gap: '8px' }}>
                             <button
                                 onClick={() => setIsFavorite(!isFavorite)}
-                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isFavorite ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400 hover:text-red-500'}`}
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${isFavorite ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200'}`}
                             >
                                 <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
                             </button>
-                            <button className="w-10 h-10 rounded-xl bg-gray-100 text-gray-400 hover:text-purple-600 flex items-center justify-center transition-all">
+                            <button className="w-10 h-10 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 flex items-center justify-center transition-all">
                                 <Share2 size={20} />
                             </button>
                         </div>
@@ -107,35 +149,45 @@ export default function ProductDetail() {
             </div>
 
             {/* Main Content */}
-            <div style={{ paddingTop: '140px', paddingBottom: '80px' }}>
+            <div style={{ paddingTop: '48px', paddingBottom: '80px' }}>
                 <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
-                    <div className="grid lg:grid-cols-2" style={{ gap: '64px' }}>
+                    <div className="grid lg:grid-cols-2" style={{ gap: '80px' }}>
 
-                        {/* Left: Image Section */}
+                        {/* Left: Image Gallery */}
                         <div className="relative">
-                            {/* Main Image */}
-                            <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-purple-100 via-white to-amber-50 border border-purple-100/50 shadow-2xl shadow-purple-500/10 relative">
+                            {/* Main Image Container */}
+                            <div className="aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group">
                                 <img
-                                    src={imageUrl}
+                                    src={images[currentImageIndex]}
                                     alt={product.name}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain"
+                                    style={{ padding: '32px' }}
                                     onError={(e) => {
-                                        e.target.src = 'https://placehold.co/600x600/EEE/999?text=No+Image';
+                                        e.target.src = 'https://placehold.co/600x600/f8f8f8/999?text=No+Image';
                                     }}
                                 />
 
-                                {/* Category Badge */}
-                                {product.category && (
-                                    <div className="absolute top-6 left-6">
-                                        <span className="bg-white/90 backdrop-blur-sm text-purple-700 text-sm font-bold rounded-full shadow-lg" style={{ padding: '8px 20px' }}>
-                                            {product.category}
-                                        </span>
-                                    </div>
+                                {/* Navigation Arrows */}
+                                {images.length > 1 && (
+                                    <>
+                                        <button
+                                            onClick={() => setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1)}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all"
+                                        >
+                                            <ChevronLeft size={24} />
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all"
+                                        >
+                                            <ChevronRight size={24} />
+                                        </button>
+                                    </>
                                 )}
 
-                                {/* Stock Badge */}
+                                {/* Low Stock Badge */}
                                 {product.stock <= 10 && product.stock > 0 && (
-                                    <div className="absolute top-6 right-6">
+                                    <div className="absolute top-4 right-4">
                                         <span className="bg-amber-500 text-white text-xs font-bold rounded-full shadow-lg" style={{ padding: '6px 14px' }}>
                                             Only {product.stock} left!
                                         </span>
@@ -143,164 +195,262 @@ export default function ProductDetail() {
                                 )}
                             </div>
 
-                            {/* Decorative Elements */}
-                            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl -z-10 opacity-20"></div>
-                            <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl -z-10 opacity-20"></div>
+                            {/* Image Dots/Thumbnails */}
+                            {images.length > 1 && (
+                                <div className="flex items-center justify-center" style={{ gap: '8px', marginTop: '20px' }}>
+                                    {images.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setCurrentImageIndex(index)}
+                                            className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentImageIndex
+                                                    ? 'bg-purple-600 w-8'
+                                                    : 'bg-gray-300 hover:bg-purple-300'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Single Image Indicator Line */}
+                            {images.length === 1 && (
+                                <div className="flex items-center justify-center" style={{ marginTop: '20px' }}>
+                                    <div className="w-16 h-1 bg-purple-600 rounded-full"></div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Right: Product Details */}
-                        <div style={{ paddingTop: '16px' }}>
-                            {/* Rating */}
-                            <div className="flex items-center" style={{ gap: '12px', marginBottom: '16px' }}>
-                                <div className="flex items-center bg-amber-50 rounded-full" style={{ gap: '4px', padding: '6px 14px' }}>
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={14} className={i < 4 ? 'text-amber-400 fill-amber-400' : 'text-gray-300'} />
-                                    ))}
-                                    <span className="text-amber-700 font-semibold text-sm" style={{ marginLeft: '6px' }}>4.0</span>
-                                </div>
-                                <span className="text-gray-500 text-sm">(24 reviews)</span>
-                            </div>
+                        <div>
+                            {/* Category Badge */}
+                            {product.category && (
+                                <span className="inline-block bg-purple-600 text-white text-xs font-semibold uppercase tracking-wider rounded-full" style={{ padding: '6px 16px', marginBottom: '20px' }}>
+                                    {product.category}
+                                </span>
+                            )}
 
-                            {/* Title */}
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900" style={{ marginBottom: '20px', lineHeight: '1.2' }}>
+                            {/* Product Title */}
+                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900" style={{ marginBottom: '16px', lineHeight: '1.2' }}>
                                 {product.name}
                             </h1>
 
+                            {/* Rating */}
+                            <div className="flex items-center" style={{ gap: '12px', marginBottom: '24px' }}>
+                                <div className="flex items-center" style={{ gap: '4px' }}>
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} size={16} className={i < 4 ? 'text-amber-400 fill-amber-400' : 'text-gray-300'} />
+                                    ))}
+                                </div>
+                                <span className="text-gray-900 font-medium">4.0</span>
+                                <span className="text-gray-400">|</span>
+                                <span className="text-gray-500">24 reviews</span>
+                            </div>
+
                             {/* Price Section */}
-                            <div className="flex items-end flex-wrap" style={{ gap: '16px', marginBottom: '24px' }}>
-                                <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+                            <div className="flex items-baseline flex-wrap" style={{ gap: '16px', marginBottom: '24px' }}>
+                                <span className="text-4xl font-bold text-gray-900">
                                     ₹{product.price?.toFixed(2)}
                                 </span>
-                                <span className="text-gray-400 line-through text-xl" style={{ marginBottom: '6px' }}>
-                                    ₹{(product.price * 1.2).toFixed(2)}
+                                <span className="text-gray-400 line-through text-lg">
+                                    ₹{originalPrice.toFixed(2)}
                                 </span>
-                                <span className="bg-green-100 text-green-700 text-sm font-bold rounded-full" style={{ padding: '4px 12px', marginBottom: '6px' }}>
-                                    20% OFF
+                                <span className="bg-amber-500 text-white text-xs font-bold rounded-full" style={{ padding: '4px 12px' }}>
+                                    {discountPercent}% OFF
                                 </span>
                             </div>
 
                             {/* Description */}
-                            <p className="text-gray-600 leading-relaxed" style={{ marginBottom: '32px' }}>
+                            <p className="text-gray-600 leading-relaxed" style={{ marginBottom: '32px', fontSize: '16px', lineHeight: '1.8' }}>
                                 {product.description || 'Premium quality packaging solution designed for e-commerce and shipping needs. Made with durable materials to ensure your products arrive safely.'}
                             </p>
 
                             {/* Stock Status */}
-                            <div className="flex items-center rounded-2xl" style={{ gap: '16px', padding: '20px', marginBottom: '32px', background: product.stock > 0 ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' : 'linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)' }}>
-                                {product.stock > 0 ? (
-                                    <>
-                                        <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/30">
-                                            <Check className="text-white" size={24} />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-green-800 text-lg">In Stock</p>
-                                            <p className="text-green-600 text-sm">{product.stock} units available for immediate shipping</p>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/30">
-                                            <Package className="text-white" size={24} />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-red-800 text-lg">Out of Stock</p>
-                                            <p className="text-red-600 text-sm">Currently unavailable - check back soon</p>
-                                        </div>
-                                    </>
-                                )}
+                            <div className="flex items-center" style={{ gap: '10px', marginBottom: '32px' }}>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}>
+                                    <Check className="text-white" size={12} />
+                                </div>
+                                <span className={`font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock'}
+                                </span>
                             </div>
 
                             {/* Admin Notice */}
                             {userIsAdmin && (
-                                <div className="flex items-center bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-2xl" style={{ gap: '16px', padding: '20px', marginBottom: '32px' }}>
-                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                                        <ShieldCheck size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-lg">Admin View Only</p>
-                                        <p className="text-gray-300 text-sm">Administrators cannot purchase products</p>
-                                    </div>
+                                <div className="flex items-center bg-gray-100 rounded-xl" style={{ gap: '12px', padding: '16px', marginBottom: '32px' }}>
+                                    <ShieldCheck size={20} className="text-gray-600" />
+                                    <span className="text-gray-600 text-sm font-medium">Admin View - Purchase disabled</span>
                                 </div>
                             )}
 
-                            {/* Quantity & Add to Cart - Hidden for admins */}
+                            {/* Quantity & Actions */}
                             {product.stock > 0 && !userIsAdmin && (
                                 <div style={{ marginBottom: '32px' }}>
-                                    <p className="text-sm font-medium text-gray-700" style={{ marginBottom: '12px' }}>Quantity</p>
-                                    <div className="flex flex-col sm:flex-row" style={{ gap: '16px' }}>
-                                        <div className="flex items-center bg-gray-50 border-2 border-gray-200 rounded-2xl overflow-hidden">
+                                    {/* Quantity Selector */}
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <label className="text-sm font-medium text-gray-700 block" style={{ marginBottom: '8px' }}>
+                                            Quantity
+                                        </label>
+                                        <div className="inline-flex items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
                                             <button
                                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                                 disabled={quantity <= 1}
-                                                className="hover:bg-gray-100 disabled:opacity-50 transition-colors"
-                                                style={{ padding: '16px 20px' }}
+                                                className="hover:bg-gray-100 disabled:opacity-50 transition-colors text-gray-600"
+                                                style={{ padding: '14px 18px' }}
                                             >
-                                                <Minus size={20} />
+                                                <Minus size={18} />
                                             </button>
-                                            <span className="font-bold text-xl text-center" style={{ minWidth: '60px' }}>
+                                            <span className="font-bold text-lg text-gray-900 text-center" style={{ minWidth: '50px' }}>
                                                 {quantity}
                                             </span>
                                             <button
                                                 onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                                                 disabled={quantity >= product.stock}
-                                                className="hover:bg-gray-100 disabled:opacity-50 transition-colors"
-                                                style={{ padding: '16px 20px' }}
+                                                className="hover:bg-gray-100 disabled:opacity-50 transition-colors text-gray-600"
+                                                style={{ padding: '14px 18px' }}
                                             >
-                                                <Plus size={20} />
+                                                <Plus size={18} />
                                             </button>
                                         </div>
+                                    </div>
 
+                                    {/* CTA Buttons */}
+                                    <div className="flex flex-col" style={{ gap: '12px' }}>
                                         <button
                                             onClick={handleAddToCart}
-                                            className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold text-lg rounded-2xl shadow-xl shadow-purple-500/30 hover:shadow-purple-500/40 transition-all flex items-center justify-center"
-                                            style={{ gap: '12px', padding: '18px 32px' }}
+                                            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all flex items-center justify-center"
+                                            style={{ gap: '10px', padding: '18px 32px' }}
                                         >
-                                            <ShoppingCart size={24} />
+                                            <ShoppingCart size={20} />
                                             Add to Cart — ₹{(product.price * quantity).toFixed(2)}
+                                        </button>
+                                        <button
+                                            onClick={handleBuyNow}
+                                            className="w-full bg-white hover:bg-purple-50 text-purple-700 font-bold rounded-xl border-2 border-purple-600 transition-all"
+                                            style={{ padding: '16px 32px' }}
+                                        >
+                                            Buy Now
                                         </button>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Benefits */}
-                            <div className="grid grid-cols-3" style={{ gap: '16px' }}>
-                                {benefits.map((benefit, index) => (
-                                    <div key={index} className="text-center bg-white rounded-2xl border border-purple-100 shadow-sm" style={{ padding: '20px 12px' }}>
-                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center" style={{ margin: '0 auto 12px' }}>
-                                            <benefit.icon size={22} className="text-purple-600" />
-                                        </div>
-                                        <p className="font-semibold text-gray-800 text-sm" style={{ marginBottom: '4px' }}>{benefit.title}</p>
-                                        <p className="text-xs text-gray-500">{benefit.desc}</p>
+                            {/* Out of Stock Button */}
+                            {product.stock <= 0 && !userIsAdmin && (
+                                <button
+                                    disabled
+                                    className="w-full bg-gray-200 text-gray-500 font-bold rounded-xl cursor-not-allowed"
+                                    style={{ padding: '18px 32px', marginBottom: '32px' }}
+                                >
+                                    Out of Stock
+                                </button>
+                            )}
+
+                            {/* Benefits Row */}
+                            <div className="grid grid-cols-3 border-t border-gray-100" style={{ paddingTop: '24px', gap: '16px' }}>
+                                {[
+                                    { icon: Truck, label: 'Free Delivery', sublabel: 'On ₹2000+', color: 'text-purple-500' },
+                                    { icon: Shield, label: 'Quality Assured', sublabel: 'Premium materials', color: 'text-amber-500' },
+                                    { icon: RotateCcw, label: 'Easy Returns', sublabel: '30 days', color: 'text-purple-500' },
+                                ].map((benefit, i) => (
+                                    <div key={i} className="text-center">
+                                        <benefit.icon size={20} className={benefit.color} style={{ margin: '0 auto 8px' }} />
+                                        <p className="font-medium text-gray-700 text-xs">{benefit.label}</p>
+                                        <p className="text-gray-400 text-xs">{benefit.sublabel}</p>
                                     </div>
                                 ))}
-                            </div>
-
-                            {/* SKU */}
-                            <div className="border-t border-gray-100" style={{ marginTop: '32px', paddingTop: '20px' }}>
-                                <p className="text-sm text-gray-400">
-                                    <span className="font-medium">SKU:</span> PM-{String(product.id).padStart(4, '0')} •
-                                    <span className="font-medium" style={{ marginLeft: '12px' }}>Category:</span> {product.category || 'General'}
-                                </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Related Products Section Placeholder */}
-                    <div className="border-t border-purple-100" style={{ marginTop: '80px', paddingTop: '64px' }}>
+                    {/* Description & Specifications Section */}
+                    <div className="grid lg:grid-cols-2 border-t border-gray-100" style={{ marginTop: '80px', paddingTop: '64px', gap: '64px' }}>
+                        {/* Description */}
+                        <div>
+                            <h2 className="text-xl font-bold text-gray-900" style={{ marginBottom: '24px' }}>
+                                Description
+                            </h2>
+                            <div className="text-gray-600 leading-relaxed" style={{ lineHeight: '1.9' }}>
+                                <p style={{ marginBottom: '16px' }}>
+                                    {product.description || 'Designed for those who value both form and function, this premium packaging solution brings a new level of quality to everyday shipping needs.'}
+                                </p>
+                                <p>
+                                    Made from premium materials and finished with attention to detail, this product is built to protect your items during transit. Perfect for e-commerce sellers, retailers, and businesses looking for reliable packaging solutions.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Specifications */}
+                        <div>
+                            <h2 className="text-xl font-bold text-gray-900" style={{ marginBottom: '24px' }}>
+                                Specifications
+                            </h2>
+                            <div className="border border-gray-100 rounded-xl overflow-hidden">
+                                {specifications.map((spec, index) => (
+                                    <div
+                                        key={index}
+                                        className={`flex justify-between ${index !== specifications.length - 1 ? 'border-b border-gray-100' : ''}`}
+                                        style={{ padding: '16px 20px' }}
+                                    >
+                                        <span className="text-gray-500">{spec.label}</span>
+                                        <span className="text-gray-900 font-medium">{spec.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* What's Included */}
+                            <div style={{ marginTop: '32px' }}>
+                                <h3 className="font-bold text-gray-900" style={{ marginBottom: '16px' }}>
+                                    What's Included
+                                </h3>
+                                <ul className="text-gray-600" style={{ lineHeight: '2' }}>
+                                    <li className="flex items-center" style={{ gap: '10px' }}>
+                                        <Check size={16} className="text-green-500" />
+                                        {product.name}
+                                    </li>
+                                    <li className="flex items-center" style={{ gap: '10px' }}>
+                                        <Check size={16} className="text-green-500" />
+                                        Quality packaging
+                                    </li>
+                                    <li className="flex items-center" style={{ gap: '10px' }}>
+                                        <Check size={16} className="text-green-500" />
+                                        Product warranty
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Related Products Section */}
+                    <div className="border-t border-gray-100" style={{ marginTop: '80px', paddingTop: '64px' }}>
                         <div className="flex items-center justify-between" style={{ marginBottom: '32px' }}>
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900" style={{ marginBottom: '4px' }}>You May Also Like</h2>
-                                <p className="text-gray-500">Customers who viewed this also viewed</p>
+                                <h2 className="text-2xl font-bold text-gray-900" style={{ marginBottom: '4px' }}>
+                                    Discover Other Products
+                                </h2>
+                                <p className="text-gray-500">You may also like these</p>
                             </div>
-                            <Link to="/products" className="text-purple-600 hover:text-purple-700 font-medium flex items-center" style={{ gap: '4px' }}>
-                                View All <ChevronLeft size={16} className="rotate-180" />
+                            <Link
+                                to="/products"
+                                className="text-purple-600 hover:text-purple-700 font-medium flex items-center transition-colors"
+                                style={{ gap: '4px' }}
+                            >
+                                View All <ChevronRight size={16} />
                             </Link>
                         </div>
-                        <div className="bg-purple-50/50 rounded-3xl flex items-center justify-center" style={{ padding: '80px 32px' }}>
-                            <div className="text-center">
-                                <Sparkles size={48} className="text-purple-300" style={{ margin: '0 auto 16px' }} />
-                                <p className="text-gray-500">Related products coming soon</p>
+
+                        {relatedProducts.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: '24px' }}>
+                                {relatedProducts.map((relProduct) => (
+                                    <ProductCard key={relProduct.id} product={relProduct} />
+                                ))}
                             </div>
-                        </div>
+                        ) : (
+                            <div className="bg-gray-50 rounded-2xl flex items-center justify-center" style={{ padding: '60px 32px' }}>
+                                <div className="text-center">
+                                    <Box size={40} className="text-gray-300" style={{ margin: '0 auto 16px' }} />
+                                    <p className="text-gray-500">More products coming soon</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

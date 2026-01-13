@@ -7,7 +7,8 @@ import {
 import useAuthStore from '../../store/authStore';
 
 export default function AdminLayout() {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Start collapsed
+    const [isHovered, setIsHovered] = useState(false); // Track hover state
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout, isAdmin } = useAuthStore();
@@ -38,18 +39,23 @@ export default function AdminLayout() {
     // Fixed pixel widths for reliable layout
     const SIDEBAR_EXPANDED = 260;
     const SIDEBAR_COLLAPSED = 72;
-    const sidebarWidth = sidebarCollapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED;
+
+    // Expand on hover OR when manually expanded
+    const isExpanded = isHovered || !sidebarCollapsed;
+    const sidebarWidth = isExpanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED;
 
     return (
         <div className="flex min-h-screen bg-slate-100">
-            {/* Fixed Sidebar */}
+            {/* Fixed Sidebar - Expands on Hover */}
             <aside
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 style={{ width: `${sidebarWidth}px` }}
-                className="fixed top-0 left-0 bottom-0 z-50 flex flex-col bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 text-white shadow-xl transition-[width] duration-300 overflow-hidden"
+                className="fixed top-0 left-0 bottom-0 z-50 flex flex-col bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 text-white shadow-xl transition-[width] duration-300 ease-in-out overflow-hidden"
             >
                 {/* Logo */}
                 <div className="flex items-center flex-shrink-0 border-b border-white/10" style={{ height: '64px', padding: '0 16px' }}>
-                    {!sidebarCollapsed ? (
+                    {isExpanded ? (
                         <div className="flex items-center w-full" style={{ gap: '12px' }}>
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
                                 <Sparkles className="text-white" size={20} />
@@ -58,22 +64,11 @@ export default function AdminLayout() {
                                 <h1 className="font-bold text-base text-white truncate">LIP ADMIN</h1>
                                 <p className="text-[9px] text-amber-400 font-medium tracking-widest">PREMIUM</p>
                             </div>
-                            <button
-                                onClick={() => setSidebarCollapsed(true)}
-                                className="rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors flex-shrink-0"
-                                style={{ padding: '8px' }}
-                            >
-                                <ChevronLeft size={18} />
-                            </button>
                         </div>
                     ) : (
-                        <button
-                            onClick={() => setSidebarCollapsed(false)}
-                            className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-                            style={{ margin: '0 auto' }}
-                        >
-                            <ChevronRight size={18} />
-                        </button>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center" style={{ margin: '0 auto' }}>
+                            <Sparkles className="text-white" size={20} />
+                        </div>
                     )}
                 </div>
 
@@ -86,16 +81,16 @@ export default function AdminLayout() {
                                 <Link
                                     key={item.path}
                                     to={item.path}
-                                    style={{ height: '44px', padding: sidebarCollapsed ? '0' : '0 14px' }}
-                                    className={`flex items-center rounded-xl transition-all duration-200 ${sidebarCollapsed ? 'justify-center' : ''
+                                    style={{ height: '44px', padding: isExpanded ? '0 14px' : '0' }}
+                                    className={`flex items-center rounded-xl transition-all duration-200 ${!isExpanded ? 'justify-center' : ''
                                         } ${active
                                             ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
                                             : 'text-slate-400 hover:bg-white/10 hover:text-white'
                                         }`}
-                                    title={sidebarCollapsed ? item.label : undefined}
+                                    title={!isExpanded ? item.label : undefined}
                                 >
                                     <item.icon size={20} className="flex-shrink-0" />
-                                    {!sidebarCollapsed && (
+                                    {isExpanded && (
                                         <span className="font-medium text-sm truncate" style={{ marginLeft: '12px' }}>{item.label}</span>
                                     )}
                                 </Link>
@@ -106,7 +101,7 @@ export default function AdminLayout() {
 
                 {/* User Footer */}
                 <div className="flex-shrink-0 border-t border-white/10" style={{ padding: '12px' }}>
-                    {!sidebarCollapsed ? (
+                    {isExpanded ? (
                         <div className="flex items-center bg-white/5 rounded-xl" style={{ gap: '12px', padding: '12px' }}>
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center flex-shrink-0">
                                 <span className="font-semibold text-white text-xs">{user?.name?.[0]}</span>

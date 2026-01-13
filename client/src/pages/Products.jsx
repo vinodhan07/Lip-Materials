@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, X, SlidersHorizontal, Grid, List, Package } from 'lucide-react';
+import { Search, X, ChevronDown, Grid, List, Package } from 'lucide-react';
 import { productsAPI } from '../services/api';
 import ProductCard from '../components/products/ProductCard';
 
@@ -16,13 +16,6 @@ export default function Products() {
         category: searchParams.get('category') || '',
         sortBy: searchParams.get('sortBy') || 'newest',
     });
-
-    // Category display info
-    const categoryInfo = {
-        boxes: { name: 'Cardboard Boxes', icon: '📦', color: 'from-purple-500 to-indigo-600', desc: 'Various sizes for shipping & storage' },
-        covers: { name: 'Courier Covers', icon: '📮', color: 'from-amber-400 to-yellow-500', desc: 'Amazon, Flipkart, Meesho & more' },
-        tapes: { name: 'Packaging Tapes', icon: '🎗️', color: 'from-purple-600 to-purple-800', desc: 'Branded & colored tapes' },
-    };
 
     useEffect(() => {
         loadCategories();
@@ -76,152 +69,115 @@ export default function Products() {
         { value: 'name_asc', label: 'Name: A to Z' },
     ];
 
-    // Get current category info
-    const currentCategory = filters.category ? categoryInfo[filters.category.toLowerCase()] : null;
+    // Category pills configuration
+    const categoryPills = [
+        { key: '', label: 'All Products' },
+        { key: 'boxes', label: 'Boxes' },
+        { key: 'covers', label: 'Covers' },
+        { key: 'tapes', label: 'Tapes' },
+    ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-purple-50/50 to-white" style={{ paddingTop: '80px', paddingBottom: '64px' }}>
+        <div className="min-h-screen bg-gray-50" style={{ paddingTop: '80px', paddingBottom: '64px' }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
-                {/* Header */}
-                <div className="text-center" style={{ marginBottom: '48px' }}>
-                    {currentCategory ? (
-                        <>
-                            <div className={`w-20 h-20 bg-gradient-to-br ${currentCategory.color} rounded-2xl flex items-center justify-center shadow-lg`} style={{ margin: '0 auto 16px', fontSize: '40px' }}>
-                                {currentCategory.icon}
-                            </div>
-                            <h1 className="text-4xl md:text-5xl font-bold text-gray-900" style={{ marginBottom: '12px' }}>
-                                {currentCategory.name}
-                            </h1>
-                            <p className="text-gray-600">{currentCategory.desc}</p>
-                        </>
-                    ) : (
-                        <>
-                            <span className="inline-block bg-purple-100 text-purple-600 text-sm font-bold uppercase tracking-wider rounded-full" style={{ padding: '8px 20px', marginBottom: '16px' }}>
-                                All Products
-                            </span>
-                            <h1 className="text-4xl md:text-5xl font-bold text-gray-900" style={{ marginBottom: '16px' }}>
-                                Packaging Supplies
-                            </h1>
-                            <p className="text-gray-600 max-w-2xl" style={{ margin: '0 auto' }}>
-                                Quality cardboard boxes, courier covers, and tapes for all your shipping needs
-                            </p>
-                        </>
-                    )}
-                </div>
 
-                {/* Category Quick Filters */}
-                <div className="flex flex-wrap justify-center" style={{ gap: '12px', marginBottom: '32px' }}>
-                    <button
-                        onClick={() => handleFilterChange('category', '')}
-                        className={`flex items-center rounded-xl font-medium transition-all ${!filters.category ? 'bg-purple-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'}`}
-                        style={{ gap: '8px', padding: '12px 20px' }}
-                    >
-                        <Package size={18} />
-                        All Products
-                    </button>
-                    <button
-                        onClick={() => handleFilterChange('category', 'boxes')}
-                        className={`flex items-center rounded-xl font-medium transition-all ${filters.category === 'boxes' ? 'bg-purple-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'}`}
-                        style={{ gap: '8px', padding: '12px 20px' }}
-                    >
-                        📦 Boxes
-                    </button>
-                    <button
-                        onClick={() => handleFilterChange('category', 'covers')}
-                        className={`flex items-center rounded-xl font-medium transition-all ${filters.category === 'covers' ? 'bg-amber-500 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-amber-300'}`}
-                        style={{ gap: '8px', padding: '12px 20px' }}
-                    >
-                        📮 Covers
-                    </button>
-                    <button
-                        onClick={() => handleFilterChange('category', 'tapes')}
-                        className={`flex items-center rounded-xl font-medium transition-all ${filters.category === 'tapes' ? 'bg-purple-700 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'}`}
-                        style={{ gap: '8px', padding: '12px 20px' }}
-                    >
-                        🎗️ Tapes
-                    </button>
-                </div>
+                {/* Header Section */}
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between" style={{ marginBottom: '32px', paddingTop: '24px' }}>
+                    {/* Title */}
+                    <div style={{ marginBottom: '20px' }}>
+                        <h1 className="text-3xl font-bold text-gray-900" style={{ marginBottom: '4px' }}>
+                            Products
+                        </h1>
+                        <p className="text-gray-500 text-sm">
+                            Showing {products.length} products
+                        </p>
+                    </div>
 
-                {/* Filters Bar */}
-                <div className="bg-white rounded-2xl shadow-sm border border-purple-100" style={{ padding: '24px', marginBottom: '32px' }}>
-                    <div className="flex flex-col lg:flex-row" style={{ gap: '16px' }}>
+                    {/* Search and Sort */}
+                    <div className="flex flex-col sm:flex-row" style={{ gap: '12px' }}>
                         {/* Search */}
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                             <input
                                 type="text"
-                                placeholder="Search products..."
+                                placeholder="Search product..."
                                 value={filters.search}
                                 onChange={(e) => handleFilterChange('search', e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                                style={{ paddingLeft: '48px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px' }}
+                                className="w-full sm:w-64 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                style={{ paddingLeft: '44px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px' }}
                             />
+                            {filters.search && (
+                                <button
+                                    onClick={() => handleFilterChange('search', '')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
                         </div>
 
-                        {/* Sort */}
+                        {/* Sort Dropdown */}
                         <div className="relative">
                             <select
                                 value={filters.sortBy}
                                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                                className="appearance-none w-full lg:w-48 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                                className="appearance-none w-full sm:w-48 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer text-gray-700"
                                 style={{ padding: '12px 40px 12px 16px' }}
                             >
                                 {sortOptions.map((option) => (
                                     <option key={option.value} value={option.value}>{option.label}</option>
                                 ))}
                             </select>
-                            <SlidersHorizontal className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
                         </div>
 
                         {/* View Toggle */}
-                        <div className="flex items-center bg-gray-50 rounded-xl" style={{ gap: '4px', padding: '4px' }}>
+                        <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden">
                             <button
                                 onClick={() => setViewMode('grid')}
-                                className={`rounded-lg transition-all ${viewMode === 'grid' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
-                                style={{ padding: '10px' }}
+                                className={`transition-all ${viewMode === 'grid' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                                style={{ padding: '12px' }}
                             >
                                 <Grid size={18} />
                             </button>
                             <button
                                 onClick={() => setViewMode('list')}
-                                className={`rounded-lg transition-all ${viewMode === 'list' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
-                                style={{ padding: '10px' }}
+                                className={`transition-all ${viewMode === 'list' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                                style={{ padding: '12px' }}
                             >
                                 <List size={18} />
                             </button>
                         </div>
-
-                        {/* Clear */}
-                        {(filters.search || filters.category) && (
-                            <button
-                                onClick={clearFilters}
-                                className="flex items-center text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-xl font-medium transition-all"
-                                style={{ gap: '8px', padding: '12px 16px' }}
-                            >
-                                <X size={18} />
-                                Clear All
-                            </button>
-                        )}
                     </div>
                 </div>
 
-                {/* Active Filters */}
-                {filters.search && (
-                    <div className="flex flex-wrap" style={{ gap: '8px', marginBottom: '24px' }}>
-                        <span className="inline-flex items-center bg-purple-100 text-purple-700 rounded-full text-sm font-medium" style={{ gap: '8px', padding: '8px 16px' }}>
-                            Search: "{filters.search}"
-                            <button onClick={() => handleFilterChange('search', '')} className="hover:text-purple-900">
-                                <X size={14} />
-                            </button>
-                        </span>
-                    </div>
-                )}
+                {/* Category Filters */}
+                <div className="flex flex-wrap items-center" style={{ gap: '8px', marginBottom: '32px' }}>
+                    {categoryPills.map((pill) => (
+                        <button
+                            key={pill.key}
+                            onClick={() => handleFilterChange('category', pill.key)}
+                            className={`font-medium transition-all rounded-lg ${filters.category === pill.key
+                                    ? 'bg-gray-900 text-white'
+                                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                                }`}
+                            style={{ padding: '10px 20px' }}
+                        >
+                            {pill.label}
+                        </button>
+                    ))}
 
-                {/* Results Count */}
-                <div className="flex items-center justify-between" style={{ marginBottom: '32px' }}>
-                    <p className="text-gray-600">
-                        Showing <span className="font-semibold text-gray-900">{products.length}</span> products
-                    </p>
+                    {/* Clear Filters */}
+                    {(filters.search || filters.category) && (
+                        <button
+                            onClick={clearFilters}
+                            className="flex items-center text-purple-600 hover:text-purple-700 font-medium transition-all"
+                            style={{ gap: '4px', padding: '10px 16px' }}
+                        >
+                            <X size={16} />
+                            Clear
+                        </button>
+                    )}
                 </div>
 
                 {/* Products Grid */}
@@ -231,23 +187,23 @@ export default function Products() {
                     </div>
                 ) : products.length > 0 ? (
                     <div
-                        className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}
-                        style={{ gap: '24px' }}
+                        className={`grid ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1'}`}
+                        style={{ gap: '20px' }}
                     >
                         {products.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center bg-purple-50 rounded-3xl" style={{ padding: '96px 32px' }}>
-                        <div className="w-20 h-20 bg-purple-100 rounded-2xl flex items-center justify-center" style={{ margin: '0 auto 24px' }}>
-                            <Search size={32} className="text-purple-400" />
+                    <div className="text-center bg-white rounded-2xl border border-gray-100" style={{ padding: '96px 32px' }}>
+                        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center" style={{ margin: '0 auto 20px' }}>
+                            <Search size={28} className="text-gray-400" />
                         </div>
                         <h3 className="text-xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>No products found</h3>
-                        <p className="text-gray-600" style={{ marginBottom: '24px' }}>Try adjusting your search or filter criteria</p>
+                        <p className="text-gray-500" style={{ marginBottom: '24px' }}>Try adjusting your search or filter criteria</p>
                         <button
                             onClick={clearFilters}
-                            className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all"
+                            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all"
                             style={{ padding: '12px 24px' }}
                         >
                             Clear all filters

@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Package, Box, Truck, Star, Shield, Zap, Award, ChevronRight, ShoppingBag, CheckCircle } from 'lucide-react';
 import { productsAPI } from '../services/api';
 import ProductCard from '../components/products/ProductCard';
+import useAuthStore from '../store/authStore';
 
 export default function Home() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTestimonial, setActiveTestimonial] = useState(0);
     const heroRef = useRef(null);
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuthStore();
+
     const { scrollYProgress } = useScroll({
         target: heroRef,
         offset: ["start start", "end start"]
@@ -17,6 +21,15 @@ export default function Home() {
 
     const heroY = useTransform(scrollYProgress, [0, 1], [0, 100]);
     const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+    // Handle Shop Now click - redirect to login if not authenticated
+    const handleShopNow = () => {
+        if (isAuthenticated) {
+            navigate('/products');
+        } else {
+            navigate('/login?redirect=/products');
+        }
+    };
 
     useEffect(() => {
         loadData();
@@ -104,14 +117,14 @@ export default function Home() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
                                 className="flex flex-wrap justify-center lg:justify-start" style={{ gap: '16px', marginBottom: '48px' }}>
-                                <Link
-                                    to="/products"
-                                    className="group inline-flex items-center bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold rounded-full shadow-lg shadow-amber-500/30 transition-all"
+                                <button
+                                    onClick={handleShopNow}
+                                    className="group inline-flex items-center bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold rounded-full shadow-lg shadow-amber-500/30 transition-all cursor-pointer"
                                     style={{ gap: '8px', padding: '18px 36px' }}
                                 >
                                     Shop Now
                                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                                </Link>
+                                </button>
                                 <Link
                                     to="/contact"
                                     className="inline-flex items-center bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 transition-all"
@@ -165,8 +178,8 @@ export default function Home() {
                                     </div>
                                 </div>
 
-                                {/* Floating Badge */}
-                                <div className="absolute bg-white rounded-2xl shadow-2xl flex items-center" style={{ gap: '12px', padding: '16px 20px', top: '-20px', right: '-20px' }}>
+                                {/* Floating Badge - Top Left */}
+                                <div className="absolute bg-white rounded-2xl shadow-2xl flex items-center z-10" style={{ gap: '12px', padding: '16px 20px', top: '-30px', left: '-30px' }}>
                                     <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                                         <Truck className="text-purple-600" size={20} />
                                     </div>
@@ -176,39 +189,35 @@ export default function Home() {
                                     </div>
                                 </div>
 
-                                {/* Floating Badge - Top Right */}
+                                {/* Floating Badge - Top Right (Quality Verified) */}
                                 <motion.div
                                     animate={{ y: [0, -8, 0] }}
                                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                    className="absolute -top-4 -right-4 bg-white p-3 rounded-xl border border-gray-100 shadow-xl"
+                                    className="absolute bg-white rounded-2xl shadow-2xl flex items-center z-10"
+                                    style={{ gap: '12px', padding: '16px 20px', top: '-40px', right: '-50px' }}
                                 >
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                                            <CheckCircle size={16} className="text-emerald-500" />
-                                        </div>
-                                        <div>
-                                            <div className="text-gray-900 font-medium text-sm">Quality Verified</div>
-                                            <div className="text-xs text-gray-500">ISO Certified</div>
-                                        </div>
+                                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                        <CheckCircle className="text-emerald-600" size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-bold text-gray-800">Quality Verified</div>
+                                        <div className="text-xs text-gray-500">ISO Certified</div>
                                     </div>
                                 </motion.div>
 
-                                {/* Floating Badge - Bottom Left */}
+                                {/* Floating Badge - Bottom Left (500+ Brands) */}
                                 <motion.div
                                     animate={{ y: [0, 8, 0] }}
                                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                                    className="absolute -bottom-4 -left-4 bg-white p-3 rounded-xl border border-gray-100 shadow-xl"
+                                    className="absolute bg-white rounded-2xl shadow-2xl flex items-center z-10"
+                                    style={{ gap: '12px', padding: '16px 20px', bottom: '-30px', left: '-30px' }}
                                 >
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex -space-x-1.5">
-                                            <div className="w-6 h-6 rounded-full bg-red-400 border-2 border-white" />
-                                            <div className="w-6 h-6 rounded-full bg-teal-400 border-2 border-white" />
-                                            <div className="w-6 h-6 rounded-full bg-yellow-400 border-2 border-white" />
-                                        </div>
-                                        <div>
-                                            <div className="text-gray-900 font-medium text-sm">500+ Brands</div>
-                                            <div className="text-xs text-gray-500">Trust Us</div>
-                                        </div>
+                                    <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                                        <Award className="text-amber-600" size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-bold text-gray-800">500+ Brands</div>
+                                        <div className="text-xs text-gray-500">Trust Us</div>
                                     </div>
                                 </motion.div>
                             </motion.div>

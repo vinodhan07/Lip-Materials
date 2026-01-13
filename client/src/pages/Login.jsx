@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, ArrowRight, Package } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
@@ -10,6 +10,7 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const { login, isLoading, error, clearError } = useAuthStore();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,7 +28,9 @@ export default function Login() {
             if (result.user.role === 'admin') {
                 navigate('/admin');
             } else {
-                navigate('/');
+                // Check for redirect parameter, otherwise go to home
+                const redirectTo = searchParams.get('redirect') || '/';
+                navigate(redirectTo);
             }
         } else {
             toast.error(result.error);
