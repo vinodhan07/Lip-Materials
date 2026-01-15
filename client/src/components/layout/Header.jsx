@@ -117,9 +117,23 @@ export default function Header() {
                                 )}
 
                                 <div className={`flex items-center ${isScrolled ? 'border-gray-200' : 'border-white/20'} border-l`} style={{ gap: '8px', paddingLeft: '12px' }}>
-                                    <Link to="/profile" className={`flex items-center ${textColor} ${hoverColor} transition-colors`} style={{ gap: '8px' }}>
-                                        <div className={`w-9 h-9 rounded-xl ${isScrolled ? 'bg-purple-100' : 'bg-white/10'} flex items-center justify-center`}>
-                                            <User size={18} className={isScrolled ? 'text-purple-600' : 'text-white'} />
+                                    <Link
+                                        to="/profile"
+                                        className={`flex items-center ${textColor} ${hoverColor} transition-all group`}
+                                        style={{ gap: '8px' }}
+                                    >
+                                        <div
+                                            className={`w-8 h-8 rounded-full border overflow-hidden flex items-center justify-center transition-all group-hover:scale-105 group-hover:shadow-md ${isScrolled ? 'border-gray-200 bg-purple-100' : 'border-white/30 bg-white/10'}`}
+                                        >
+                                            {user?.photo_url ? (
+                                                <img
+                                                    src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${user.photo_url}`}
+                                                    alt={user?.name || 'Profile'}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <User size={16} className={isScrolled ? 'text-purple-600' : 'text-white'} />
+                                            )}
                                         </div>
                                         <span className="font-medium text-sm">{user?.name?.split(' ')[0]}</span>
                                     </Link>

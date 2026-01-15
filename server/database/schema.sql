@@ -6,6 +6,11 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   phone TEXT,
   address TEXT,
+  city TEXT,
+  state TEXT,
+  country TEXT,
+  pincode TEXT,
+  photo_url TEXT,
   role TEXT CHECK(role IN ('admin', 'user')) DEFAULT 'user',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP

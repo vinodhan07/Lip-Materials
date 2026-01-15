@@ -37,6 +37,9 @@ export const authAPI = {
     register: (data) => api.post('/auth/register', data),
     getProfile: () => api.get('/auth/me'),
     updateProfile: (data) => api.put('/auth/profile', data),
+    uploadProfilePhoto: (formData) => api.post('/auth/profile/photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 };
 
 // Products API
