@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, ChevronDown, Grid, List, SlidersHorizontal, Package } from 'lucide-react';
+import { ChevronDown, Grid, List, SlidersHorizontal, Package, ChevronRight } from 'lucide-react';
 import { productsAPI } from '../services/api';
 import ProductCard from '../components/products/ProductCard';
 
 // Animation variants
 const pageVariants = {
     initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.4 } },
-    exit: { opacity: 0, transition: { duration: 0.3 } }
+    animate: { opacity: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, transition: { duration: 0.2 } }
 };
 
 const containerVariants = {
@@ -17,17 +17,27 @@ const containerVariants = {
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.06,
-            delayChildren: 0.1
+            staggerChildren: 0.04,
+            delayChildren: 0.05
         }
     }
 };
 
 const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 15, scale: 0.98 },
     visible: {
         opacity: 1,
         y: 0,
+        scale: 1,
+        transition: { duration: 0.25, ease: 'easeOut' }
+    }
+};
+
+const sidebarVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+        opacity: 1,
+        x: 0,
         transition: { duration: 0.3, ease: 'easeOut' }
     }
 };
@@ -35,45 +45,64 @@ const itemVariants = {
 export default function Products() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [viewMode, setViewMode] = useState('grid');
     const [showFilters, setShowFilters] = useState(false);
+    const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
-    const [filters, setFilters] = useState({
-        search: searchParams.get('search') || '',
-        category: searchParams.get('category') || '',
-        sortBy: searchParams.get('sortBy') || 'newest',
-        minPrice: searchParams.get('minPrice') || '',
-        maxPrice: searchParams.get('maxPrice') || '',
-    });
+    // Get current category from URL
+    const currentCategory = searchParams.get('category') || '';
+    const currentSearch = searchParams.get('search') || '';
+    const currentSortBy = searchParams.get('sortBy') || 'newest';
 
-    // Debounced search
-    const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+    // Categories with their display names
+    const categories = useMemo(() => [
+        { key: '', label: 'All Products' },
+        { key: 'boxes', label: 'Boxes' },
+        { key: 'covers', label: 'Covers' },
+        { key: 'tapes', label: 'Tapes' },
+    ], []);
 
+    // Calculate category counts from all products
+    const categoryCounts = useMemo(() => {
+        const counts = { '': allProducts.length };
+        categories.forEach(cat => {
+            if (cat.key) {
+                counts[cat.key] = allProducts.filter(p => p.category === cat.key).length;
+            }
+        });
+        return counts;
+    }, [allProducts, categories]);
+
+    // Load all products once for category counts
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(filters.search);
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [filters.search]);
+        const loadAllProducts = async () => {
+            try {
+                const response = await productsAPI.getAll({});
+                setAllProducts(response.data.products || []);
+            } catch (err) {
+                console.error('Failed to load all products:', err);
+            }
+        };
+        loadAllProducts();
+    }, []);
 
-    // Load products when relevant filters change
+    // Load filtered products when URL params change
     useEffect(() => {
         loadProducts();
-    }, [debouncedSearch, filters.category, filters.sortBy, filters.minPrice, filters.maxPrice]);
+    }, [currentCategory, currentSearch, currentSortBy]);
 
     const loadProducts = async () => {
         setLoading(true);
         setError(null);
         try {
             const params = {
-                search: debouncedSearch,
-                category: filters.category,
-                sortBy: filters.sortBy,
+                search: currentSearch,
+                category: currentCategory,
+                sortBy: currentSortBy,
             };
-            if (filters.minPrice) params.minPrice = filters.minPrice;
-            if (filters.maxPrice) params.maxPrice = filters.maxPrice;
 
             const response = await productsAPI.getAll(params);
             setProducts(response.data.products || []);
@@ -86,30 +115,26 @@ export default function Products() {
         }
     };
 
-    const handleFilterChange = useCallback((key, value) => {
-        setFilters(prev => {
-            const newFilters = { ...prev, [key]: value };
+    const handleCategoryChange = useCallback((category) => {
+        const params = new URLSearchParams(searchParams);
+        if (category) {
+            params.set('category', category);
+        } else {
+            params.delete('category');
+        }
+        setSearchParams(params);
+        setShowMobileSidebar(false);
+    }, [searchParams, setSearchParams]);
 
-            // Update URL params
-            const params = new URLSearchParams();
-            if (newFilters.search) params.set('search', newFilters.search);
-            if (newFilters.category) params.set('category', newFilters.category);
-            if (newFilters.sortBy && newFilters.sortBy !== 'newest') params.set('sortBy', newFilters.sortBy);
-            if (newFilters.minPrice) params.set('minPrice', newFilters.minPrice);
-            if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice);
-            setSearchParams(params);
-
-            return newFilters;
-        });
-    }, [setSearchParams]);
-
-    const clearFilters = useCallback(() => {
-        setFilters({ search: '', category: '', sortBy: 'newest', minPrice: '', maxPrice: '' });
-        setSearchParams({});
-    }, [setSearchParams]);
-
-    const hasActiveFilters = filters.search || filters.category || filters.minPrice || filters.maxPrice;
-    const activeFilterCount = [filters.category, filters.minPrice, filters.maxPrice].filter(Boolean).length;
+    const handleSortChange = useCallback((sortBy) => {
+        const params = new URLSearchParams(searchParams);
+        if (sortBy && sortBy !== 'newest') {
+            params.set('sortBy', sortBy);
+        } else {
+            params.delete('sortBy');
+        }
+        setSearchParams(params);
+    }, [searchParams, setSearchParams]);
 
     const sortOptions = [
         { value: 'newest', label: 'Newest First' },
@@ -119,262 +144,235 @@ export default function Products() {
         { value: 'name_desc', label: 'Name: Z to A' },
     ];
 
-    const categoryPills = [
-        { key: '', label: 'All Products' },
-        { key: 'boxes', label: 'Boxes' },
-        { key: 'covers', label: 'Covers' },
-        { key: 'tapes', label: 'Tapes' },
-    ];
-
     return (
         <motion.div
             className="min-h-screen bg-gray-50"
-            style={{ paddingTop: '80px', paddingBottom: '64px' }}
+            style={{ paddingTop: '140px', paddingBottom: '64px' }}
             variants={pageVariants}
             initial="initial"
             animate="animate"
             exit="exit"
         >
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
+                <div className="flex" style={{ gap: '32px' }}>
 
-                {/* Header Section */}
-                <motion.div
-                    className="flex flex-col lg:flex-row lg:items-center lg:justify-between"
-                    style={{ marginBottom: '24px', paddingTop: '24px' }}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
-                >
-                    <div style={{ marginBottom: '16px' }}>
-                        <h1 className="text-3xl font-bold text-gray-900" style={{ marginBottom: '4px' }}>
-                            Products
-                        </h1>
-                        <p className="text-gray-500 text-sm">
-                            {loading ? 'Loading...' : `Showing ${products.length} products`}
-                        </p>
-                    </div>
-
-                    {/* Search and Controls */}
-                    <div className="flex flex-col sm:flex-row" style={{ gap: '12px' }}>
-                        {/* Search */}
-                        <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                            <input
-                                type="text"
-                                placeholder="Search products..."
-                                value={filters.search}
-                                onChange={(e) => handleFilterChange('search', e.target.value)}
-                                className="w-full sm:w-64 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                                style={{ paddingLeft: '44px', paddingRight: filters.search ? '40px' : '16px', paddingTop: '12px', paddingBottom: '12px' }}
-                            />
-                            {filters.search && (
-                                <button
-                                    onClick={() => handleFilterChange('search', '')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                >
-                                    <X size={16} />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Sort Dropdown */}
-                        <div className="relative">
-                            <select
-                                value={filters.sortBy}
-                                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                                className="appearance-none w-full sm:w-48 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer text-gray-700"
-                                style={{ padding: '12px 40px 12px 16px' }}
-                            >
-                                {sortOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
+                    {/* Sidebar - Categories */}
+                    <motion.aside
+                        className="hidden lg:block w-64 flex-shrink-0"
+                        variants={sidebarVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm sticky" style={{ top: '160px', padding: '24px' }}>
+                            <h3 className="text-lg font-bold text-gray-900" style={{ marginBottom: '20px' }}>
+                                Categories
+                            </h3>
+                            <nav className="flex flex-col" style={{ gap: '4px' }}>
+                                {categories.map((cat) => (
+                                    <motion.button
+                                        key={cat.key}
+                                        onClick={() => handleCategoryChange(cat.key)}
+                                        className={`flex items-center justify-between w-full text-left rounded-xl transition-all ${currentCategory === cat.key
+                                                ? 'bg-purple-50 text-purple-700'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                            }`}
+                                        style={{ padding: '12px 16px' }}
+                                        whileHover={{ x: 4 }}
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        <span className={`font-medium ${currentCategory === cat.key ? 'text-purple-700' : ''}`}>
+                                            {cat.label}
+                                        </span>
+                                        <span className={`text-sm ${currentCategory === cat.key ? 'text-purple-500' : 'text-gray-400'}`}>
+                                            {categoryCounts[cat.key] || 0}
+                                        </span>
+                                    </motion.button>
                                 ))}
-                            </select>
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                            </nav>
                         </div>
+                    </motion.aside>
 
-                        {/* Filters Toggle */}
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center justify-center rounded-xl border transition-all ${showFilters ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
-                            style={{ padding: '12px', gap: '8px' }}
-                        >
-                            <SlidersHorizontal size={18} />
-                            {activeFilterCount > 0 && (
-                                <span className="bg-amber-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                    {activeFilterCount}
-                                </span>
-                            )}
-                        </button>
-
-                        {/* View Toggle */}
-                        <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden">
-                            <button
-                                onClick={() => setViewMode('grid')}
-                                className={`transition-all ${viewMode === 'grid' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                                style={{ padding: '12px' }}
-                            >
-                                <Grid size={18} />
-                            </button>
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className={`transition-all ${viewMode === 'list' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                                style={{ padding: '12px' }}
-                            >
-                                <List size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* Advanced Filters Panel */}
-                <AnimatePresence>
-                    {showFilters && (
+                    {/* Main Content */}
+                    <div className="flex-1 min-w-0">
+                        {/* Header Section */}
                         <motion.div
-                            className="bg-white rounded-2xl border border-gray-100 shadow-sm"
-                            style={{ padding: '20px', marginBottom: '24px' }}
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
+                            className="flex flex-col lg:flex-row lg:items-center lg:justify-between"
+                            style={{ marginBottom: '24px' }}
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: '16px' }}>
-                                {/* Price Range */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700" style={{ marginBottom: '8px' }}>
-                                        Min Price (₹)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        placeholder="0"
-                                        value={filters.minPrice}
-                                        onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                        style={{ padding: '10px 14px' }}
-                                        min="0"
-                                    />
+                            <div style={{ marginBottom: '16px' }}>
+                                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900" style={{ marginBottom: '4px' }}>
+                                    {currentCategory
+                                        ? categories.find(c => c.key === currentCategory)?.label || 'Products'
+                                        : 'All Products'
+                                    }
+                                </h1>
+                                <p className="text-gray-500 text-sm">
+                                    {loading ? 'Loading...' : `Showing ${products.length} products`}
+                                </p>
+                            </div>
+
+                            {/* Controls */}
+                            <div className="flex items-center" style={{ gap: '12px' }}>
+                                {/* Mobile Category Toggle */}
+                                <button
+                                    onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+                                    className="lg:hidden flex items-center bg-white border border-gray-200 rounded-xl text-gray-600 hover:border-gray-300 transition-all"
+                                    style={{ padding: '12px', gap: '8px' }}
+                                >
+                                    <SlidersHorizontal size={18} />
+                                    <span className="text-sm font-medium">Filters</span>
+                                </button>
+
+                                {/* Sort Dropdown */}
+                                <div className="relative">
+                                    <select
+                                        value={currentSortBy}
+                                        onChange={(e) => handleSortChange(e.target.value)}
+                                        className="appearance-none bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer text-gray-700 text-sm"
+                                        style={{ padding: '12px 40px 12px 16px' }}
+                                    >
+                                        {sortOptions.map((option) => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700" style={{ marginBottom: '8px' }}>
-                                        Max Price (₹)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        placeholder="10000"
-                                        value={filters.maxPrice}
-                                        onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                        style={{ padding: '10px 14px' }}
-                                        min="0"
-                                    />
+
+                                {/* View Toggle */}
+                                <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                    <motion.button
+                                        onClick={() => setViewMode('grid')}
+                                        className={`transition-all ${viewMode === 'grid' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                                        style={{ padding: '12px' }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Grid size={18} />
+                                    </motion.button>
+                                    <motion.button
+                                        onClick={() => setViewMode('list')}
+                                        className={`transition-all ${viewMode === 'list' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                                        style={{ padding: '12px' }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <List size={18} />
+                                    </motion.button>
                                 </div>
                             </div>
                         </motion.div>
-                    )}
-                </AnimatePresence>
 
-                {/* Category Filters */}
-                <motion.div
-                    className="flex flex-wrap items-center"
-                    style={{ gap: '8px', marginBottom: '32px' }}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.2 }}
-                >
-                    {categoryPills.map((pill) => (
-                        <button
-                            key={pill.key}
-                            onClick={() => handleFilterChange('category', pill.key)}
-                            className={`font-medium transition-all rounded-lg ${filters.category === pill.key
-                                ? 'bg-gray-900 text-white'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
-                                }`}
-                            style={{ padding: '10px 20px' }}
-                        >
-                            {pill.label}
-                        </button>
-                    ))}
+                        {/* Mobile Sidebar */}
+                        <AnimatePresence>
+                            {showMobileSidebar && (
+                                <motion.div
+                                    className="lg:hidden bg-white rounded-2xl border border-gray-100 shadow-sm"
+                                    style={{ padding: '20px', marginBottom: '24px' }}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <h3 className="text-lg font-bold text-gray-900" style={{ marginBottom: '16px' }}>
+                                        Categories
+                                    </h3>
+                                    <div className="flex flex-wrap" style={{ gap: '8px' }}>
+                                        {categories.map((cat) => (
+                                            <button
+                                                key={cat.key}
+                                                onClick={() => handleCategoryChange(cat.key)}
+                                                className={`rounded-xl font-medium transition-all ${currentCategory === cat.key
+                                                        ? 'bg-purple-600 text-white'
+                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                    }`}
+                                                style={{ padding: '10px 16px' }}
+                                            >
+                                                {cat.label} ({categoryCounts[cat.key] || 0})
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                    {/* Clear Filters */}
-                    {hasActiveFilters && (
-                        <button
-                            onClick={clearFilters}
-                            className="flex items-center text-purple-600 hover:text-purple-700 font-medium transition-all"
-                            style={{ gap: '4px', padding: '10px 16px' }}
-                        >
-                            <X size={16} />
-                            Clear All
-                        </button>
-                    )}
-                </motion.div>
-
-                {/* Error State */}
-                {error && (
-                    <motion.div
-                        className="bg-red-50 border border-red-100 rounded-2xl text-center"
-                        style={{ padding: '32px', marginBottom: '24px' }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                    >
-                        <p className="text-red-600 font-medium">{error}</p>
-                        <button
-                            onClick={loadProducts}
-                            className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all"
-                            style={{ padding: '10px 20px' }}
-                        >
-                            Try Again
-                        </button>
-                    </motion.div>
-                )}
-
-                {/* Products Grid */}
-                {loading ? (
-                    <div className="flex justify-center" style={{ padding: '96px 0' }}>
-                        <div className="spinner"></div>
-                    </div>
-                ) : products.length > 0 ? (
-                    <motion.div
-                        className={`grid ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1'}`}
-                        style={{ gap: '20px' }}
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        key={`products-${filters.category}-${debouncedSearch}`}
-                    >
-                        {products.map((product) => (
+                        {/* Error State */}
+                        {error && (
                             <motion.div
-                                key={product.id}
-                                variants={itemVariants}
+                                className="bg-red-50 border border-red-100 rounded-2xl text-center"
+                                style={{ padding: '32px', marginBottom: '24px' }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
                             >
-                                <ProductCard product={product} />
+                                <p className="text-red-600 font-medium">{error}</p>
+                                <button
+                                    onClick={loadProducts}
+                                    className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all"
+                                    style={{ padding: '10px 20px' }}
+                                >
+                                    Try Again
+                                </button>
                             </motion.div>
-                        ))}
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        className="text-center bg-white rounded-2xl border border-gray-100"
-                        style={{ padding: '96px 32px' }}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4 }}
-                    >
-                        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center" style={{ margin: '0 auto 20px' }}>
-                            <Package size={28} className="text-gray-400" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>No products found</h3>
-                        <p className="text-gray-500" style={{ marginBottom: '24px' }}>
-                            {hasActiveFilters ? 'Try adjusting your filters' : 'No products available at the moment'}
-                        </p>
-                        {hasActiveFilters && (
-                            <button
-                                onClick={clearFilters}
-                                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all"
-                                style={{ padding: '12px 24px' }}
-                            >
-                                Clear all filters
-                            </button>
                         )}
-                    </motion.div>
-                )}
+
+                        {/* Products Grid */}
+                        {loading ? (
+                            <div className="flex justify-center" style={{ padding: '96px 0' }}>
+                                <motion.div
+                                    className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full"
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                />
+                            </div>
+                        ) : products.length > 0 ? (
+                            <motion.div
+                                className={`grid ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}
+                                style={{ gap: '20px' }}
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="visible"
+                                key={`products-${currentCategory}-${currentSearch}-${currentSortBy}`}
+                            >
+                                {products.map((product) => (
+                                    <motion.div
+                                        key={product.id}
+                                        variants={itemVariants}
+                                        layout
+                                    >
+                                        <ProductCard product={product} />
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                className="text-center bg-white rounded-2xl border border-gray-100"
+                                style={{ padding: '96px 32px' }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center" style={{ margin: '0 auto 20px' }}>
+                                    <Package size={28} className="text-gray-400" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>No products found</h3>
+                                <p className="text-gray-500" style={{ marginBottom: '24px' }}>
+                                    {currentCategory ? 'Try selecting a different category' : 'No products available at the moment'}
+                                </p>
+                                {currentCategory && (
+                                    <motion.button
+                                        onClick={() => handleCategoryChange('')}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all"
+                                        style={{ padding: '12px 24px' }}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        View All Products
+                                    </motion.button>
+                                )}
+                            </motion.div>
+                        )}
+                    </div>
+                </div>
             </div>
         </motion.div>
     );
