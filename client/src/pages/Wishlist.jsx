@@ -41,11 +41,11 @@ export default function Wishlist() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50/50 to-white" style={{ paddingTop: '80px' }}>
                 <div className="text-center">
-                    <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto" style={{ marginBottom: '24px' }}>
                         <Heart size={32} className="text-purple-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Please login to view your wishlist</h2>
-                    <p className="text-gray-500 mb-8">Save items you love and come back to them later</p>
+                    <h2 className="text-2xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>Please login to view your wishlist</h2>
+                    <p className="text-gray-500" style={{ marginBottom: '32px' }}>Save items you love and come back to them later</p>
                     <Link to="/login" className="inline-flex items-center bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition-colors">
                         Login Now
                     </Link>
@@ -66,12 +66,12 @@ export default function Wishlist() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50/50 to-white" style={{ paddingTop: '80px' }}>
                 <div className="text-center">
-                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto" style={{ marginBottom: '24px' }}>
                         <Heart size={32} className="text-gray-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Your wishlist is empty</h2>
-                    <p className="text-gray-500 mb-8">Start exploring products and save your favorites!</p>
-                    <Link to="/products" className="inline-flex items-center gap-2 bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition-colors">
+                    <h2 className="text-2xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>Your wishlist is empty</h2>
+                    <p className="text-gray-500" style={{ marginBottom: '32px' }}>Start exploring products and save your favorites!</p>
+                    <Link to="/products" className="inline-flex items-center bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition-colors" style={{ gap: '8px' }}>
                         Explore Products <ArrowRight size={20} />
                     </Link>
                 </div>
@@ -81,8 +81,8 @@ export default function Wishlist() {
 
     return (
         <div className="min-h-screen bg-gray-50" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
-            <div className="max-w-[1400px] mx-auto px-6">
-                <div className="flex items-center gap-3 mb-8">
+            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
+                <div className="flex items-center" style={{ gap: '12px', marginBottom: '32px' }}>
                     <Heart className="text-purple-600 fill-purple-600" size={28} />
                     <h1 className="text-3xl font-bold text-gray-900">My Wishlist</h1>
                     <span className="bg-purple-100 text-purple-700 font-bold px-3 py-1 rounded-full text-sm">
@@ -91,7 +91,8 @@ export default function Wishlist() {
                 </div>
 
                 <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                    style={{ gap: '24px' }}
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
