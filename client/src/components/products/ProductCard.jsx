@@ -37,8 +37,8 @@ function ProductCard({ product }) {
     const navigate = useNavigate();
     const [isHovered, setIsHovered] = useState(false);
 
-    // Check if in wishlist
-    const inWishlist = isInWishlist(product.id);
+    // Check if in wishlist using a reactive selector
+    const inWishlist = useWishlistStore(state => state.items.some(item => item.product_id == product.id)); // Loose equality for string/number safety
     const [isWishlistHovered, setIsWishlistHovered] = useState(false);
 
     const handleToggleWishlist = async (e) => {
@@ -96,30 +96,32 @@ function ProductCard({ product }) {
             whileHover="hover"
             className="h-full"
         >
-            <Link
-                to={`/products/${product.id}`}
-                className="bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full block"
-                aria-label={`View ${product.name} - ₹${product.price?.toFixed(2)}`}
+            <div
+                className="bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full relative group"
             >
                 {/* Image Container */}
                 <div className="relative aspect-square overflow-hidden bg-gray-100">
-                    <OptimizedImage
-                        src={imageUrl}
-                        alt={product.name}
-                        className="w-full h-full"
-                        style={{ padding: '16px' }}
-                        width={300}
-                        height={300}
-                    />
+                    <Link to={`/products/${product.id}`} className="block w-full h-full">
+                        <OptimizedImage
+                            src={imageUrl}
+                            alt={product.name}
+                            className="w-full h-full"
+                            style={{ padding: '16px' }}
+                            width={300}
+                            height={300}
+                        />
+                    </Link>
 
                     {/* Hover Arrow Icon */}
-                    <motion.div
-                        className="absolute w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center"
-                        style={{ top: '12px', right: '12px' }}
-                        variants={arrowVariants}
-                    >
-                        <ArrowUpRight size={16} className="text-gray-700" />
-                    </motion.div>
+                    <Link to={`/products/${product.id}`}>
+                        <motion.div
+                            className="absolute w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center"
+                            style={{ top: '12px', right: '12px' }}
+                            variants={arrowVariants}
+                        >
+                            <ArrowUpRight size={16} className="text-gray-700" />
+                        </motion.div>
+                    </Link>
 
                     {/* Wishlist Button - Only for non-admins */}
                     {!userIsAdmin && (
@@ -127,10 +129,10 @@ function ProductCard({ product }) {
                             onClick={handleToggleWishlist}
                             onMouseEnter={() => setIsWishlistHovered(true)}
                             onMouseLeave={() => setIsWishlistHovered(false)}
-                            className="absolute w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-transform hover:scale-110"
+                            className="absolute w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-transform hover:scale-110 z-20 cursor-pointer"
                             style={{ top: '12px', left: '12px' }}
                             initial={{ x: -10, opacity: 0 }}
-                            whileHover={{ x: 0, opacity: 1 }} // This might conflict with parent variant, assume fine for now or adjust
+                            whileHover={{ x: 0, opacity: 1 }}
                             animate={{ x: 0, opacity: 1 }}
                         >
                             <Heart
@@ -148,6 +150,7 @@ function ProductCard({ product }) {
                             onMouseEnter={() => setIsHovered(true)}
                             onMouseLeave={() => setIsHovered(false)}
                             disabled={product.stock <= 0}
+                            className="z-20 cursor-pointer"
                             aria-label={product.stock <= 0 ? 'Out of Stock' : `Add ${product.name} to cart`}
                             style={{
                                 position: 'absolute',
@@ -193,7 +196,7 @@ function ProductCard({ product }) {
 
                     {/* Out of Stock Overlay */}
                     {product.stock <= 0 && (
-                        <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center">
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
                             <span className="bg-gray-900 text-white text-xs font-bold rounded-full px-4 py-2">
                                 Out of Stock
                             </span>
@@ -203,15 +206,17 @@ function ProductCard({ product }) {
 
                 {/* Content */}
                 <div className="flex flex-col flex-1" style={{ padding: '16px' }}>
-                    {/* Product Name */}
-                    <h3 className="font-semibold text-gray-900 line-clamp-1 transition-colors" style={{ marginBottom: '6px' }}>
-                        {product.name}
-                    </h3>
+                    <Link to={`/products/${product.id}`} className="block">
+                        {/* Product Name */}
+                        <h3 className="font-semibold text-gray-900 line-clamp-1 transition-colors" style={{ marginBottom: '6px' }}>
+                            {product.name}
+                        </h3>
 
-                    {/* Price */}
-                    <span className="text-lg font-bold text-gray-900" style={{ marginBottom: '12px' }}>
-                        ₹{product.price?.toFixed(2)}
-                    </span>
+                        {/* Price */}
+                        <span className="block text-lg font-bold text-gray-900" style={{ marginBottom: '12px' }}>
+                            ₹{product.price?.toFixed(2)}
+                        </span>
+                    </Link>
 
                     {/* Stock and Sold */}
                     {/* Footer Info: Admin sees Stock/Sold, User sees Ratings */}
@@ -236,7 +241,7 @@ function ProductCard({ product }) {
                         )}
                     </div>
                 </div>
-            </Link>
+            </div>
         </motion.div>
     );
 }

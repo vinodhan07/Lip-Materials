@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, SlidersHorizontal, Package, ChevronRight } from 'lucide-react';
 import { productsAPI } from '../services/api';
+import useWishlistStore from '../store/wishlistStore';
+import useAuthStore from '../store/authStore';
 import ProductCard from '../components/products/ProductCard';
 
 // Animation variants
@@ -49,7 +51,10 @@ export default function Products() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showFilters, setShowFilters] = useState(false);
+
     const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+    const { fetchWishlist } = useWishlistStore();
+    const { isAuthenticated } = useAuthStore();
 
     // Get current category from URL
     const currentCategory = searchParams.get('category') || '';
@@ -77,6 +82,9 @@ export default function Products() {
 
     // Load all products once for category counts
     useEffect(() => {
+        if (isAuthenticated) {
+            fetchWishlist();
+        }
         const loadAllProducts = async () => {
             try {
                 const response = await productsAPI.getAll({});

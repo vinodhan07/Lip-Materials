@@ -41,7 +41,7 @@ export default function Wishlist() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50/50 to-white" style={{ paddingTop: '80px' }}>
                 <div className="text-center">
-                    <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto" style={{ marginBottom: '24px' }}>
+                    <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center" style={{ marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }}>
                         <Heart size={32} className="text-purple-500" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>Please login to view your wishlist</h2>
@@ -66,7 +66,7 @@ export default function Wishlist() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50/50 to-white" style={{ paddingTop: '80px' }}>
                 <div className="text-center">
-                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto" style={{ marginBottom: '24px' }}>
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center" style={{ marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }}>
                         <Heart size={32} className="text-gray-400" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>Your wishlist is empty</h2>
