@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Grid, List, SlidersHorizontal, Package, ChevronRight } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal, Package, ChevronRight } from 'lucide-react';
 import { productsAPI } from '../services/api';
 import ProductCard from '../components/products/ProductCard';
 
@@ -48,7 +48,6 @@ export default function Products() {
     const [allProducts, setAllProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [viewMode, setViewMode] = useState('grid');
     const [showFilters, setShowFilters] = useState(false);
     const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
@@ -173,8 +172,8 @@ export default function Products() {
                                         key={cat.key}
                                         onClick={() => handleCategoryChange(cat.key)}
                                         className={`flex items-center justify-between w-full text-left rounded-xl transition-all ${currentCategory === cat.key
-                                                ? 'bg-purple-50 text-purple-700'
-                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                            ? 'bg-purple-50 text-purple-700'
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                             }`}
                                         style={{ padding: '12px 16px' }}
                                         whileHover={{ x: 4 }}
@@ -240,26 +239,6 @@ export default function Products() {
                                     </select>
                                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                 </div>
-
-                                {/* View Toggle */}
-                                <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden">
-                                    <motion.button
-                                        onClick={() => setViewMode('grid')}
-                                        className={`transition-all ${viewMode === 'grid' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                                        style={{ padding: '12px' }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        <Grid size={18} />
-                                    </motion.button>
-                                    <motion.button
-                                        onClick={() => setViewMode('list')}
-                                        className={`transition-all ${viewMode === 'list' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                                        style={{ padding: '12px' }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        <List size={18} />
-                                    </motion.button>
-                                </div>
                             </div>
                         </motion.div>
 
@@ -283,8 +262,8 @@ export default function Products() {
                                                 key={cat.key}
                                                 onClick={() => handleCategoryChange(cat.key)}
                                                 className={`rounded-xl font-medium transition-all ${currentCategory === cat.key
-                                                        ? 'bg-purple-600 text-white'
-                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                    ? 'bg-purple-600 text-white'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                     }`}
                                                 style={{ padding: '10px 16px' }}
                                             >
@@ -326,7 +305,7 @@ export default function Products() {
                             </div>
                         ) : products.length > 0 ? (
                             <motion.div
-                                className={`grid ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}
+                                className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                                 style={{ gap: '20px' }}
                                 variants={containerVariants}
                                 initial="hidden"
@@ -373,7 +352,7 @@ export default function Products() {
                         )}
                     </div>
                 </div>
-            </div>
-        </motion.div>
+            </div >
+        </motion.div >
     );
 }

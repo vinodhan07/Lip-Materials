@@ -1,8 +1,9 @@
 import { memo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingCart, ShieldCheck, ArrowUpRight, Star } from 'lucide-react';
+import { ShoppingCart, ShieldCheck, ArrowUpRight, Star, Heart } from 'lucide-react';
 import useCartStore from '../../store/cartStore';
+import useWishlistStore from '../../store/wishlistStore';
 import useAuthStore from '../../store/authStore';
 import toast from 'react-hot-toast';
 import OptimizedImage from '../common/OptimizedImage';
@@ -31,9 +32,32 @@ const arrowVariants = {
 
 function ProductCard({ product }) {
     const { addToCart } = useCartStore();
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
     const { isAuthenticated, isAdmin } = useAuthStore();
     const navigate = useNavigate();
     const [isHovered, setIsHovered] = useState(false);
+
+    // Check if in wishlist
+    const inWishlist = isInWishlist(product.id);
+    const [isWishlistHovered, setIsWishlistHovered] = useState(false);
+
+    const handleToggleWishlist = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!isAuthenticated) {
+            toast('Please login to use wishlist', { icon: '💖' });
+            return;
+        }
+
+        if (inWishlist) {
+            const result = await removeFromWishlist(product.id);
+            if (result.success) toast.success('Removed from wishlist');
+        } else {
+            const result = await addToWishlist(product.id);
+            if (result.success) toast.success('Added to wishlist');
+        }
+    };
 
     const handleAddToCart = async (e) => {
         e.preventDefault();
@@ -95,6 +119,25 @@ function ProductCard({ product }) {
                     >
                         <ArrowUpRight size={16} className="text-gray-700" />
                     </motion.div>
+
+                    {/* Wishlist Button - Only for non-admins */}
+                    {!userIsAdmin && (
+                        <motion.button
+                            onClick={handleToggleWishlist}
+                            onMouseEnter={() => setIsWishlistHovered(true)}
+                            onMouseLeave={() => setIsWishlistHovered(false)}
+                            className="absolute top-3 left-3 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-transform hover:scale-110"
+                            initial={{ x: -10, opacity: 0 }}
+                            whileHover={{ x: 0, opacity: 1 }} // This might conflict with parent variant, assume fine for now or adjust
+                            animate={{ x: 0, opacity: 1 }}
+                        >
+                            <Heart
+                                size={16}
+                                className={inWishlist ? "text-red-500 fill-red-500" : "text-gray-400"}
+                                style={{ transition: 'all 0.2s' }}
+                            />
+                        </motion.button>
+                    )}
 
                     {/* Quick Add Button - Hidden for admins */}
                     {!userIsAdmin && (
