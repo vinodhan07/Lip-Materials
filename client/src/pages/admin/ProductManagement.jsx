@@ -201,7 +201,7 @@ export default function ProductManagement() {
                     duration: 5000,
                     style: {
                         borderRadius: '10px',
-                        background: '#333',
+                        background: '#7e22ce',
                         color: '#fff',
                     },
                 });

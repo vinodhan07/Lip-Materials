@@ -171,10 +171,10 @@ export default function Home() {
                                                 <span className="text-gray-900 font-semibold text-sm">{cat.name}</span>
                                             </Link>
                                         ))}
-                                        <div className="bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex flex-col items-center justify-center" style={{ padding: '28px' }}>
+                                        <Link to="/products" className="bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex flex-col items-center justify-center hover:scale-[1.02] transition-transform cursor-pointer shadow-lg shadow-amber-500/20" style={{ padding: '28px' }}>
                                             <span className="text-3xl font-bold text-purple-900">50+</span>
                                             <span className="text-purple-800 text-sm font-medium">Products</span>
-                                        </div>
+                                        </Link>
                                     </div>
                                 </div>
 
