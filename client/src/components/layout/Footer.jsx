@@ -37,16 +37,8 @@ export default function Footer() {
     ];
 
     const quickLinks = [
-        { name: 'About Us', link: '/about' },
         { name: 'Contact Us', link: '/contact' },
         { name: 'FAQ', link: '/faq' },
-        { name: 'Shipping Info', link: '/shipping-info' },
-    ];
-
-    const companyLinks = [
-        { name: 'Carrers', link: '/careers' },
-        { name: 'Privacy Policy', link: '/privacy' },
-        { name: 'Terms of Service', link: '/terms' },
     ];
 
     return (
@@ -110,7 +102,7 @@ export default function Footer() {
                 </div>
 
                 {/* Main Links Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 mb-12">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-12 mb-12">
                     <div>
                         <h4 className="text-white font-semibold mb-6">Products</h4>
                         <ul className="flex flex-col gap-3">
@@ -136,18 +128,6 @@ export default function Footer() {
                         </ul>
                     </div>
                     <div>
-                        <h4 className="text-white font-semibold mb-6">Company</h4>
-                        <ul className="flex flex-col gap-3">
-                            {companyLinks.map((item) => (
-                                <li key={item.name}>
-                                    <Link to={item.link} className="text-slate-400 hover:text-purple-400 transition-colors text-sm font-medium">
-                                        {item.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div>
                         <h4 className="text-white font-semibold mb-6">Contact</h4>
                         <ul className="flex flex-col gap-3 text-sm text-slate-400">
                             <li>123 Packaging Street</li>
@@ -164,8 +144,6 @@ export default function Footer() {
                         © {currentYear} LIP Materials. All rights reserved.
                     </p>
                     <div className="flex items-center gap-6 order-1 md:order-2">
-                        <Link to="/privacy" className="text-slate-500 hover:text-purple-400 text-sm transition-colors">Privacy</Link>
-                        <Link to="/terms" className="text-slate-500 hover:text-purple-400 text-sm transition-colors">Terms</Link>
                         <Link to="/cookies" className="text-slate-500 hover:text-purple-400 text-sm transition-colors">Cookies</Link>
                     </div>
                 </div>

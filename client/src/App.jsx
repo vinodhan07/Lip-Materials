@@ -233,12 +233,8 @@ function App() {
         />
 
         {/* Static Pages */}
-        <Route path="/about" element={<MainLayout><StaticPage title="About Us" /></MainLayout>} />
         <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
         <Route path="/faq" element={<MainLayout><StaticPage title="FAQ" /></MainLayout>} />
-        <Route path="/privacy" element={<MainLayout><StaticPage title="Privacy Policy" /></MainLayout>} />
-        <Route path="/terms" element={<MainLayout><StaticPage title="Terms of Service" /></MainLayout>} />
-        <Route path="/shipping-info" element={<MainLayout><StaticPage title="Shipping Info" /></MainLayout>} />
         <Route path="/returns-policy" element={<MainLayout><StaticPage title="Returns Policy" /></MainLayout>} />
 
         {/* 404 */}
